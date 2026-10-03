@@ -380,7 +380,7 @@ export function computeDerived(c: Character): Derived {
     matrixInitVR: c.magicType === 'technomancer'
       ? `${v('log') + v('int')} + 2D6 cold / 3D6 hot`
       : `Data Processing + ${v('int')} + 2D6 cold / 3D6 hot`,
-    astralInit: `${v('log') + v('int')} + 2D6`,
+    astralInit: `${v('log') + v('int')} + ${c.options.astralInitDice}D6`,
     physicalCM: 8 + Math.ceil(v('bod') / 2) + builtTough,
     stunCM: Math.max(1, 8 + Math.ceil(v('wil') / 2) - glassJaw),
     overflow: v('bod') * 2 + 2 * qualityLevels(c, 'will_to_live'),

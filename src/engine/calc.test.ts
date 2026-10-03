@@ -135,6 +135,16 @@ describe('derived stats', () => {
   })
 })
 
+describe('ruleset', () => {
+  it('defaults new characters to Berlin City Edition (2023) rules', () => {
+    const c = newCharacter('seattle')
+    expect(c.options).toEqual({ maxAvailability: 7, karmaSpellsAtCreation: false, karmaForContacts: false, astralInitDice: 3 })
+    c.attributes.log = { points: 2, adjust: 0, karma: 0 }
+    c.attributes.int = { points: 1, adjust: 0, karma: 0 }
+    expect(computeDerived(c).astralInit).toBe('5 + 3D6')
+  })
+})
+
 describe('validation', () => {
   it('flags adjustment points on attributes the metatype does not raise', () => {
     const c = make(c => { c.attributes.str = { points: 0, adjust: 1, karma: 0 } })

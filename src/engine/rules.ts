@@ -1,9 +1,11 @@
 // Tunable creation-rule constants. Change these (not the engine) when errata or table rules differ.
-// Sources: SR6 core rulebook + CGL errata (Aug 2019, Feb 2020) + German 3rd printing errata.
+// Base ruleset: Shadowrun, Sixth World Core Rulebook: City Edition - Berlin (CGL, Nov 2023),
+// which folds in all errata to date. Cross-checked against CGL errata (2019/2020) and the
+// German 3rd printing errata, which the Berlin edition was produced alongside.
 
 export const RULES = {
   startingKarma: 50,
-  /** Leftover karma carried into play (German 3rd printing / Missions: 5; original printing: 0). */
+  /** Leftover karma carried into play (errata'd printings: 5; original 2019 printing: 0). */
   maxKarmaCarryover: 5,
   /** Karma cost to raise an attribute or active skill to the new rating = rating × this. */
   attributeKarmaPerRating: 5,
@@ -43,26 +45,32 @@ export const RULES = {
   startingEssence: 6,
 }
 
-/** Rules that differ between printings; chosen per character. */
+/** Rules that differ between printings or tables; chosen per character. */
 export interface TableOptions {
-  /** Max Availability at creation: 6 (English core/Seattle) or 7 (German 3rd printing / Berlin). */
+  /** Max Availability at creation: 7 (errata'd printings) or 6 (original 2019 printing). */
   maxAvailability: 6 | 7
-  /** Allow buying extra spells / complex forms with karma at creation (forbidden by German 3rd printing). */
+  /** Allow buying extra spells / complex forms with karma at creation (errata'd printings forbid it). */
   karmaSpellsAtCreation: boolean
   /** Contact points beyond the free pool cost 1 karma each (Sixth World Companion option). */
   karmaForContacts: boolean
+  /** Astral initiative dice: 3D6 (errata'd printings) or 2D6 (original 2019 printing). */
+  astralInitDice: 2 | 3
 }
 
-export const DEFAULT_OPTIONS: TableOptions = {
-  maxAvailability: 6,
-  karmaSpellsAtCreation: false,
-  karmaForContacts: true,
-}
-
-export const BERLIN_OPTIONS: TableOptions = {
+/** Default: Berlin City Edition (2023). */
+export const BERLIN_2023_OPTIONS: TableOptions = {
   maxAvailability: 7,
   karmaSpellsAtCreation: false,
-  karmaForContacts: true,
+  karmaForContacts: false,
+  astralInitDice: 3,
+}
+
+/** For tables still using the original 2019 core rulebook without errata. */
+export const ORIGINAL_2019_OPTIONS: TableOptions = {
+  maxAvailability: 6,
+  karmaSpellsAtCreation: true,
+  karmaForContacts: false,
+  astralInitDice: 2,
 }
 
 export type Rules = typeof RULES

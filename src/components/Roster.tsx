@@ -31,16 +31,17 @@ export function Roster({ chars, onOpen, onCreate, onImport, onDelete, onDuplicat
         <div className="hero-mark" aria-hidden>▲</div>
         <div>
           <h1>Shadowrun Awakening</h1>
-          <p className="dim">A free, open-source Sixth World character generator, built for Berlin and Seattle tables.</p>
+          <p className="dim">A free, open-source Shadowrun Sixth World character generator, using the Berlin City Edition core rules (2023).</p>
         </div>
       </header>
 
       <section className="card">
         <h3>New runner</h3>
         <div className="row">
-          <button type="button" className="primary" onClick={() => onCreate('berlin')}>New Berlin runner</button>
-          <button type="button" onClick={() => onCreate('seattle')}>New Seattle runner</button>
-          <button type="button" onClick={() => onCreate('core')}>Core rules only</button>
+          <button type="button" className="primary" onClick={() => onCreate('berlin')}>New runner</button>
+          <span className="small faint">or set in</span>
+          <button type="button" className="ghost small" onClick={() => onCreate('seattle')}>Seattle</button>
+          <button type="button" className="ghost small" onClick={() => onCreate('core')}>no city</button>
           <span className="spacer" />
           <button type="button" onClick={() => fileRef.current?.click()}>Import JSON…</button>
           <input

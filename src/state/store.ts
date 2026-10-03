@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { BERLIN_OPTIONS, DEFAULT_OPTIONS } from '../engine/rules'
+import { BERLIN_2023_OPTIONS } from '../engine/rules'
 import type { AttrAlloc, Character } from '../engine/types'
 import { loadActiveId, loadCharacters, saveActiveId, saveCharacters } from './storage'
 
@@ -19,7 +19,7 @@ export function newCharacter(setting: Character['setting'] = 'berlin'): Characte
     concept: '',
     notes: '',
     setting,
-    options: { ...(setting === 'berlin' ? BERLIN_OPTIONS : DEFAULT_OPTIONS) },
+    options: { ...BERLIN_2023_OPTIONS },
     priorities: { metatype: 'D', attributes: 'A', magic: 'E', skills: 'B', resources: 'C' },
     metatype: 'human',
     magicType: 'mundane',
@@ -45,7 +45,7 @@ export function newCharacter(setting: Character['setting'] = 'berlin'): Characte
 
 /** Fill any fields missing from older or hand-edited saves. */
 export function normalize(raw: Partial<Character>): Character {
-  const base = newCharacter(raw.setting ?? 'core')
+  const base = newCharacter(raw.setting ?? 'berlin')
   return {
     ...base,
     ...raw,
