@@ -54,7 +54,7 @@ npm run build    # production build in dist/
 
 ## Contributing
 
-Found a wrong number? Fix it in `src/data/` and open a pull request, citing the book and page. The gear catalog's Essence values were transcribed by hand and deserve a second pair of eyes.
+Found a wrong number? Fix it in `src/data/` and open a pull request, citing the book and page. Data was checked against the Berlin City Edition (2023); the gear catalog is still a subset of the book, so additions are welcome.
 
 Good next steps:
 - cyberware grades

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { GEAR } from '../data'
 import { newCharacter, uid } from '../state/store'
 import { attrRange, attrValue, computeBudget, computeDerived, freeSpellCount, stepCost } from './calc'
 import type { Character } from './types'
@@ -211,13 +212,14 @@ describe('validation', () => {
   })
 
   it('enforces the table availability limit', () => {
-    const c = make(c => { c.gear.push({ uid: uid(), id: 'bone_lacing_titanium', qty: 1 }) })
-    c.options.maxAvailability = 6
+    GEAR.push({ id: 'test_rare', name: 'Test Rare Item', category: 'misc', cost: 1, avail: 7, legality: 'I' })
+    const c = make(c => { c.gear.push({ uid: uid(), id: 'wired_reflexes_4', qty: 1 }) })
     expect(errors(c).some(m => m.includes('Availability'))).toBe(false)
-    c.gear.push({ uid: uid(), id: 'fake_sin', qty: 1, rating: 7 })
-    expect(errors(c).some(m => m.includes('Fake SIN has Availability 7'))).toBe(true)
+    c.gear.push({ uid: uid(), id: 'test_rare', qty: 1 })
+    expect(errors(c).some(m => m.includes('Test Rare Item has Availability 7'))).toBe(true)
     c.options.maxAvailability = 7
-    expect(errors(c).some(m => m.includes('Fake SIN'))).toBe(false)
+    expect(errors(c).some(m => m.includes('Test Rare Item'))).toBe(false)
+    GEAR.pop()
   })
 
   it('blocks extra spells unless the table allows karma purchases', () => {
