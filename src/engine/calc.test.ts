@@ -1,0 +1,194 @@
+import { describe, expect, it } from 'vitest'
+import { newCharacter, uid } from '../state/store'
+import { attrValue, computeBudget, computeDerived, freeSpellCount, stepCost } from './calc'
+import type { Character } from './types'
+import { validate } from './validate'
+
+const make = (fn: (c: Character) => void = () => {}) => {
+  const c = newCharacter('core')
+  fn(c)
+  return c
+}
+const errors = (c: Character) => validate(c).filter(i => i.severity === 'error').map(i => i.message)
+
+describe('stepCost', () => {
+  it('sums new rating × factor for each step', () => {
+    expect(stepCost(1, 3, 5)).toBe(2 * 5 + 3 * 5)
+    expect(stepCost(4, 4, 5)).toBe(0)
+  })
+})
+
+describe('budgets', () => {
+  it('reads pools from the priority table', () => {
+    const b = computeBudget(make())
+    // default priorities: metatype D (human 4), attributes A, skills B, resources C
+    expect(b.adjustment.total).toBe(4)
+    expect(b.attributes.total).toBe(24)
+    expect(b.skills.total).toBe(24)
+    expect(b.nuyen.total).toBe(150_000)
+    expect(b.karma.total).toBe(50)
+  })
+
+  it('charges karma for attribute steps on top of points', () => {
+    const c = make(c => { c.attributes.bod = { points: 2, adjust: 0, karma: 1 } })
+    expect(attrValue(c, 'bod')).toBe(4)
+    expect(computeBudget(c).karma.spent).toBe(20) // 4 × 5
+  })
+
+  it('charges karma for skills and karma-bought specializations', () => {
+    const c = make(c => { c.skills.firearms = { points: 4, karma: 1, specialization: 'Rifles', specKarma: true } })
+    const b = computeBudget(c)
+    expect(b.skills.spent).toBe(4)
+    expect(b.karma.spent).toBe(5 * 5 + 5)
+  })
+
+  it('counts skill-point specializations against skill points', () => {
+    const c = make(c => { c.skills.stealth = { points: 3, karma: 0, specialization: 'Sneaking' } })
+    expect(computeBudget(c).skills.spent).toBe(4)
+  })
+
+  it('adds negative quality karma to the pool and converts karma to nuyen', () => {
+    const c = make(c => {
+      c.qualities.push({ uid: uid(), id: 'bad_luck', level: 1 })
+      c.karmaToNuyen = 5
+    })
+    const b = computeBudget(c)
+    expect(b.karma.total).toBe(60)
+    expect(b.karma.spent).toBe(5)
+    expect(b.nuyen.total).toBe(150_000 + 10_000)
+  })
+
+  it('prices Allergy by its chosen variant', () => {
+    const c = make(c => { c.qualities.push({ uid: uid(), id: 'allergy', level: 1, option: 9 }) }) // Uncommon, Severe
+    expect(computeBudget(c).negativeQualityKarma).toBe(11)
+  })
+
+  it('charges knowledge beyond Logic free slots', () => {
+    const c = make(c => {
+      c.knowledge = [1, 2, 3].map(n => ({ id: String(n), name: `K${n}` })) // Logic 1 → 1 free
+    })
+    expect(computeBudget(c).karma.spent).toBe(6)
+  })
+})
+
+describe('magic', () => {
+  it('gives full magicians 2 free spells per priority Magic', () => {
+    const c = make(c => { c.priorities = { metatype: 'D', attributes: 'B', magic: 'A', skills: 'C', resources: 'E' }; c.magicType = 'magician' })
+    expect(freeSpellCount(c)).toBe(8)
+  })
+
+  it('splits mystic adept Magic between power points and spells', () => {
+    const c = make(c => {
+      c.priorities = { metatype: 'D', attributes: 'B', magic: 'A', skills: 'C', resources: 'E' }
+      c.magicType = 'mysticAdept'
+      c.powerPointsBought = 1
+    })
+    expect(freeSpellCount(c)).toBe(6)
+    expect(computeBudget(c).powerPoints.total).toBe(1)
+  })
+
+  it('gives adepts power points equal to Magic', () => {
+    const c = make(c => {
+      c.priorities = { metatype: 'D', attributes: 'B', magic: 'A', skills: 'C', resources: 'E' }
+      c.magicType = 'adept'
+      c.magic = { points: 0, adjust: 1, karma: 0 }
+    })
+    expect(computeBudget(c).powerPoints.total).toBe(5)
+  })
+
+  it('reduces Magic for essence loss', () => {
+    const c = make(c => {
+      c.priorities = { metatype: 'D', attributes: 'B', magic: 'A', skills: 'C', resources: 'E' }
+      c.magicType = 'adept'
+      c.gear.push({ uid: uid(), id: 'datajack', qty: 1 })
+    })
+    expect(computeDerived(c).essence).toBe(5.9)
+    expect(computeDerived(c).magic).toBe(3)
+  })
+})
+
+describe('derived stats', () => {
+  it('applies troll Built Tough, dermal deposits, and armor stacking', () => {
+    const c = make(c => {
+      c.priorities = { metatype: 'A', attributes: 'B', magic: 'E', skills: 'C', resources: 'D' }
+      c.metatype = 'troll'
+      c.attributes.bod = { points: 4, adjust: 0, karma: 0 } // 5
+      c.gear.push({ uid: uid(), id: 'armor_jacket', qty: 1 }, { uid: uid(), id: 'armor_vest', qty: 1 }, { uid: uid(), id: 'helmet', qty: 1 })
+    })
+    const d = computeDerived(c)
+    expect(d.physicalCM).toBe(8 + 3 + 2)
+    expect(d.overflow).toBe(10)
+    expect(d.armor).toBe(4 + 1) // best body armor + helmet
+    expect(d.defenseRating).toBe(5 + 5 + 1)
+  })
+
+  it('uses SR6 attribute-only test formulas', () => {
+    const c = make(c => {
+      c.attributes.wil = { points: 2, adjust: 0, karma: 0 }
+      c.attributes.int = { points: 3, adjust: 0, karma: 0 }
+      c.attributes.cha = { points: 1, adjust: 0, karma: 0 }
+    })
+    const d = computeDerived(c)
+    expect(d.composure).toBe(3 + 2)
+    expect(d.judgeIntentions).toBe(3 + 4)
+    expect(d.stunCM).toBe(8 + 2)
+  })
+})
+
+describe('validation', () => {
+  it('flags adjustment points on attributes the metatype does not raise', () => {
+    const c = make(c => { c.attributes.str = { points: 0, adjust: 1, karma: 0 } })
+    expect(errors(c).some(m => m.includes("Adjustment points can't raise Strength"))).toBe(true)
+  })
+
+  it('allows only one attribute at its natural maximum', () => {
+    const c = make(c => {
+      c.attributes.agi = { points: 5, adjust: 0, karma: 0 }
+      c.attributes.rea = { points: 5, adjust: 0, karma: 0 }
+    })
+    expect(errors(c).some(m => m.includes('natural maximum'))).toBe(true)
+  })
+
+  it('caps qualities at six and net bonus karma at 20', () => {
+    const c = make(c => {
+      for (const id of ['bad_luck', 'ar_vertigo', 'astral_beacon', 'honorbound', 'incompetent', 'low_pain_tolerance', 'gremlins'])
+        c.qualities.push({ uid: uid(), id, level: 1, detail: 'x' })
+    })
+    const e = errors(c)
+    expect(e.some(m => m.includes('At most 6 qualities'))).toBe(true)
+    expect(e.some(m => m.includes('the limit is 20'))).toBe(true)
+  })
+
+  it('enforces the table availability limit', () => {
+    const c = make(c => { c.gear.push({ uid: uid(), id: 'bone_lacing_titanium', qty: 1 }) })
+    c.options.maxAvailability = 6
+    expect(errors(c).some(m => m.includes('Availability'))).toBe(false)
+    c.gear.push({ uid: uid(), id: 'fake_sin', qty: 1, rating: 7 })
+    expect(errors(c).some(m => m.includes('Fake SIN has Availability 7'))).toBe(true)
+    c.options.maxAvailability = 7
+    expect(errors(c).some(m => m.includes('Fake SIN'))).toBe(false)
+  })
+
+  it('blocks extra spells unless the table allows karma purchases', () => {
+    const c = make(c => {
+      c.priorities = { metatype: 'D', attributes: 'B', magic: 'D', skills: 'C', resources: 'A' }
+      c.magicType = 'magician'
+      c.tradition = 'hermetic'
+      c.spells = ['manabolt', 'stunbolt', 'heal']
+    })
+    expect(errors(c).some(m => m.includes('extra spells'))).toBe(true)
+    c.options.karmaSpellsAtCreation = true
+    expect(errors(c).some(m => m.includes('extra spells'))).toBe(false)
+    expect(computeBudget(c).karma.spent).toBe(5)
+  })
+
+  it('requires each priority letter exactly once', () => {
+    const c = make(c => { c.priorities.skills = 'A' })
+    expect(errors(c).some(m => m.includes('exactly once'))).toBe(true)
+  })
+
+  it('caps contact ratings at Charisma', () => {
+    const c = make(c => { c.contacts.push({ uid: uid(), name: 'Mama Zita', role: 'Fixer', connection: 3, loyalty: 1 }) })
+    expect(errors(c).some(m => m.includes("can't exceed Charisma"))).toBe(true)
+  })
+})
