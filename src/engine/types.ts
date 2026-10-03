@@ -83,6 +83,12 @@ export interface Quality {
   options?: { label: string; karma: number }[]
   /** Restricted to these metatypes. */
   metatypes?: MetatypeId[]
+  /** The quality applies to one chosen attribute (Exceptional, Impaired). */
+  attributeChoice?: 'physicalMental'
+  /** Change to the chosen attribute's maximum per level. */
+  attrMaxPerLevel?: number
+  /** Grants a second native language (Berlin qualities). */
+  grantsNativeLanguage?: string
   /** Physical condition monitor boxes per level (Built Tough). */
   physicalCM?: number
   /** Stun condition monitor change per level (Glass Jaw is negative). */
@@ -166,7 +172,7 @@ export interface SkillAlloc {
 export interface KnowledgeSkill { id: string; name: string }
 export interface Language { id: string; name: string; native: boolean; level: 0 | 1 | 2 | 3 }
 
-export interface TakenQuality { uid: string; id: string; level: number; detail?: string; option?: number }
+export interface TakenQuality { uid: string; id: string; level: number; detail?: string; option?: number; attr?: AttrId }
 export interface TakenPower { id: string; level: number }
 export interface OwnedGear { uid: string; id: string; qty: number; rating?: number }
 export interface Contact { uid: string; name: string; role: string; connection: number; loyalty: number }

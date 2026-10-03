@@ -50,7 +50,7 @@ export function validate(c: Character): Issue[] {
   const nuyenLeft = remaining(b.nuyen)
   if (nuyenLeft < 0) err('gear', `Nuyen overspent by ${(-nuyenLeft).toLocaleString()}¥.`)
   else if (nuyenLeft > RULES.maxNuyenCarryover)
-    warn('gear', `${nuyenLeft.toLocaleString()}¥ unspent; usually only ${RULES.maxNuyenCarryover.toLocaleString()}¥ carries into play.`)
+    err('gear', `${nuyenLeft.toLocaleString()}¥ unspent; you can start play with at most ${RULES.maxNuyenCarryover.toLocaleString()}¥. Buy more gear or prepay lifestyle.`)
 
   // Attributes
   let atMax = 0
@@ -93,6 +93,7 @@ export function validate(c: Character): Issue[] {
     warn('magic', 'A mentor spirit needs the Mentor Spirit quality.')
 
   // Skills
+  let skillsAtCap = 0
   for (const [id, s] of Object.entries(c.skills)) {
     const skill = skillById(id)
     if (!skill) continue
@@ -100,6 +101,7 @@ export function validate(c: Character): Issue[] {
     const hasAptitude = c.qualities.some(q => q.id === 'aptitude' && q.detail?.toLowerCase().includes(skill.name.toLowerCase()))
     const cap = RULES.maxSkillRating + (hasAptitude ? 1 : 0)
     if (r > cap) err('skills', `${skill.name} ${r} exceeds the creation maximum of ${cap}.`)
+    if (r >= RULES.maxSkillRating) skillsAtCap++
     if (s.specialization && r === 0) err('skills', `${skill.name}: needs a rating before taking a specialization.`)
     if (skill.attr === 'mag' && !['magician', 'aspected', 'mysticAdept'].includes(c.magicType) && r > 0 && !(id === 'astral' && c.magicType === 'adept'))
       err('skills', `${skill.name} requires a magician or mystic adept.`)
@@ -107,7 +109,11 @@ export function validate(c: Character): Issue[] {
     if (c.magicType === 'aspected' && c.aspectedSkill && ['sorcery', 'conjuring', 'enchanting'].includes(id) && id !== c.aspectedSkill && r > 0)
       err('skills', `An aspected ${c.aspectedSkill} magician can't take ${skill.name}.`)
   }
-  if (!c.languages.some(l => l.native)) warn('skills', 'Pick a native language.')
+  if (skillsAtCap > RULES.skillsAtMax)
+    err('skills', `Only ${RULES.skillsAtMax} skill may be at the creation maximum (${RULES.maxSkillRating}, or ${RULES.maxSkillRating + 1} with Aptitude); you have ${skillsAtCap}.`)
+  const natives = c.languages.filter(l => l.native).length
+  if (natives === 0) warn('skills', 'Pick a native language.')
+  if (natives > 1) err('skills', 'Only one native language is allowed (qualities like Agent of the Flux State add theirs automatically).')
 
   // Qualities
   if (c.qualities.length > RULES.maxQualities)
@@ -118,7 +124,8 @@ export function validate(c: Character): Issue[] {
   for (const t of c.qualities) {
     const q = qualityById(t.id)
     if (!q) continue
-    if (q.needsDetail && !t.detail?.trim()) warn('qualities', `${q.name}: describe the specifics.`)
+    if (q.attributeChoice && !t.attr) err('qualities', `${q.name}: choose an attribute.`)
+    else if (q.needsDetail && !t.detail?.trim()) warn('qualities', `${q.name}: describe the specifics.`)
     if (q.metatypes && !q.metatypes.includes(c.metatype)) err('qualities', `${q.name} isn't available to a ${meta.name}.`)
     if (q.id === 'sensitive_system' && c.magicType !== 'mundane') err('qualities', 'Sensitive System is only for mundane characters.')
   }

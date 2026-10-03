@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react'
 import { QUALITIES } from '../../data'
-import { computeBudget, metatypeOf, takenQualityKarma } from '../../engine/calc'
+import { ATTR_NAMES, computeBudget, metatypeOf, takenQualityKarma } from '../../engine/calc'
 import { RULES } from '../../engine/rules'
-import type { Quality, TakenQuality } from '../../engine/types'
+import type { AttrId, Quality, TakenQuality } from '../../engine/types'
+import { ATTRS } from '../../engine/types'
 import { uid } from '../../state/store'
 import { PoolBadge, Section, Stepper, type StepProps } from '../ui'
 
@@ -93,7 +94,14 @@ export function QualitiesStep({ c, set }: StepProps) {
                       )}
                     </td>
                     <td>
+                      {q.attributeChoice ? (
+                        <select aria-label={`${q.name} attribute`} value={t.attr ?? ''} onChange={e => update(t, { attr: (e.target.value || undefined) as AttrId | undefined })}>
+                          <option value="">Choose attribute…</option>
+                          {ATTRS.map(a => <option key={a} value={a}>{ATTR_NAMES[a]}</option>)}
+                        </select>
+                      ) : (
                       <input type="text" aria-label={`${q.name} details`} placeholder={q.needsDetail ? 'Details (required)' : 'Notes'} value={t.detail ?? ''} onChange={e => update(t, { detail: e.target.value })} />
+                      )}
                     </td>
                     <td className="num mono">{q.positive ? '−' : '+'}{takenQualityKarma(q, t)}</td>
                     <td>

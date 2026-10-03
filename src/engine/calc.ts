@@ -55,8 +55,17 @@ export function stepCost(from: number, to: number, factor: number): number {
   return sum
 }
 
+/** Metatype range, adjusted by Exceptional (+1 max) and Impaired (−1 max per level, not below 2). */
 export function attrRange(c: Character, a: AttrId | 'edg'): Range {
-  return metatypeOf(c).attributes[a]
+  const base = metatypeOf(c).attributes[a]
+  let delta = 0
+  for (const t of c.qualities) {
+    if (t.attr !== a) continue
+    const q = QUALITIES.find(x => x.id === t.id)
+    if (q?.attrMaxPerLevel) delta += q.attrMaxPerLevel * (q.maxLevel ? Math.max(1, t.level) : 1)
+  }
+  const max = delta < 0 ? Math.max(2, base.max + delta) : base.max + delta
+  return { min: base.min, max }
 }
 
 export function attrValue(c: Character, a: AttrId): number {
@@ -340,6 +349,7 @@ export interface Derived {
   astralInit: string
   physicalCM: number
   stunCM: number
+  unarmedAR: number
   overflow: number
   defenseRating: number
   composure: number
@@ -380,9 +390,10 @@ export function computeDerived(c: Character): Derived {
     matrixInitVR: c.magicType === 'technomancer'
       ? `${v('log') + v('int')} + 2D6 cold / 3D6 hot`
       : `Data Processing + ${v('int')} + 2D6 cold / 3D6 hot`,
-    astralInit: `${v('log') + v('int')} + ${c.options.astralInitDice}D6`,
+    astralInit: `${v('log') + v('int')} + 2D6`,
     physicalCM: 8 + Math.ceil(v('bod') / 2) + builtTough,
-    stunCM: Math.max(1, 8 + Math.ceil(v('wil') / 2) - glassJaw),
+    stunCM: Math.max(2, 8 + Math.ceil(v('wil') / 2) - glassJaw),
+    unarmedAR: v('rea') + v('str'),
     overflow: v('bod') * 2 + 2 * qualityLevels(c, 'will_to_live'),
     defenseRating: v('bod') + armor + dermal,
     composure: v('wil') + v('cha'),

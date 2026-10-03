@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { newCharacter, uid } from '../state/store'
-import { attrValue, computeBudget, computeDerived, freeSpellCount, stepCost } from './calc'
+import { attrRange, attrValue, computeBudget, computeDerived, freeSpellCount, stepCost } from './calc'
 import type { Character } from './types'
 import { validate } from './validate'
 
@@ -135,13 +135,54 @@ describe('derived stats', () => {
   })
 })
 
-describe('ruleset', () => {
-  it('defaults new characters to Berlin City Edition (2023) rules', () => {
+describe('Berlin City Edition (2023) rules as written', () => {
+  it('defaults new characters to the book rules', () => {
     const c = newCharacter('seattle')
-    expect(c.options).toEqual({ maxAvailability: 7, karmaSpellsAtCreation: false, karmaForContacts: false, astralInitDice: 3 })
-    c.attributes.log = { points: 2, adjust: 0, karma: 0 }
-    c.attributes.int = { points: 1, adjust: 0, karma: 0 }
-    expect(computeDerived(c).astralInit).toBe('5 + 3D6')
+    expect(c.options).toEqual({ maxAvailability: 6, karmaSpellsAtCreation: false, karmaForContacts: false })
+  })
+
+  it('uses Logic + Intuition + 2D6 astral initiative (p. 161)', () => {
+    const c = make(c => {
+      c.attributes.log = { points: 2, adjust: 0, karma: 0 }
+      c.attributes.int = { points: 1, adjust: 0, karma: 0 }
+    })
+    expect(computeDerived(c).astralInit).toBe('5 + 2D6')
+  })
+
+  it('allows only one skill at the creation maximum (p. 65)', () => {
+    const c = make(c => {
+      c.skills.firearms = { points: 6, karma: 0 }
+      c.skills.stealth = { points: 6, karma: 0 }
+    })
+    expect(errors(c).some(m => m.includes('Only 1 skill may be at the creation maximum'))).toBe(true)
+  })
+
+  it('caps leftover nuyen at 5,000 (p. 68)', () => {
+    const c = make(c => { c.lifestyle = 'low' })
+    expect(errors(c).some(m => m.includes('at most 5,000'))).toBe(true)
+  })
+
+  it('applies Exceptional and Impaired to attribute maximums', () => {
+    const c = make(c => {
+      c.qualities.push({ uid: uid(), id: 'exceptional_attribute', level: 1, attr: 'agi' })
+      c.qualities.push({ uid: uid(), id: 'impaired', level: 6, attr: 'str' })
+    })
+    expect(attrRange(c, 'agi').max).toBe(7)
+    expect(attrRange(c, 'str').max).toBe(2)
+  })
+
+  it('never drops Stun below 2 boxes with Glass Jaw (p. 77)', () => {
+    const c = make(c => {
+      c.qualities.push({ uid: uid(), id: 'glass_jaw', level: 6 }, { uid: uid(), id: 'glass_jaw', level: 6 })
+    })
+    expect(computeDerived(c).stunCM).toBe(2)
+  })
+
+  it('lets Berlin qualities grant a second native language', () => {
+    const c = make(c => { c.qualities.push({ uid: uid(), id: 'agent_of_flux', level: 1 }) })
+    expect(errors(c).some(m => m.includes('native language'))).toBe(false)
+    c.languages.push({ id: 'x', name: 'Turkish', native: true, level: 0 })
+    expect(errors(c).some(m => m.includes('Only one native language'))).toBe(true)
   })
 })
 

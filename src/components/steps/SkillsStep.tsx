@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { SKILLS } from '../../data'
+import { QUALITIES, SKILLS } from '../../data'
 import { ATTR_NAMES, attrValue, computeBudget, remaining, skillRating } from '../../engine/calc'
 import { RULES } from '../../engine/rules'
 import type { AttrId, Character, Language, SkillAlloc } from '../../engine/types'
@@ -141,6 +141,9 @@ export function SkillsStep({ c, set }: StepProps) {
       </Section>
 
       <Section title="Languages">
+        {c.qualities.map(t => QUALITIES.find(q => q.id === t.id)).filter(q => q?.grantsNativeLanguage).map(q => (
+          <p key={q!.id} className="small dim">{q!.grantsNativeLanguage} (Native), free from {q!.name}.</p>
+        ))}
         <table>
           <tbody>
             {c.languages.map(l => (

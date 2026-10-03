@@ -2,7 +2,7 @@
 
 A free, open-source **Shadowrun Sixth World (SR6)** character generator that runs in your browser.
 
-**Ruleset:** *Shadowrun, Sixth World Core Rulebook: City Edition - Berlin* (Catalyst Game Labs, November 2023), which includes all errata to that date. A few rules that changed between printings can be switched per character, for tables using the original 2019 book.
+**Ruleset:** *Shadowrun, Sixth World Core Rulebook: City Edition - Berlin* (Catalyst Game Labs, November 2023), which includes all errata to that date. Creation rules were checked against that book, with page references in `src/engine/rules.ts`.
 
 It needs no install and no account. Characters are saved in your browser, and you can export them as JSON to back them up or share them.
 
@@ -26,11 +26,10 @@ It needs no install and no account. Characters are saved in your browser, and yo
   - complex forms
 - **City Edition qualities** for Berlin and Seattle, filtered by your campaign setting.
 - **Gear catalog** with weapons, armor, commlinks, decks, rigger consoles, rated cyberware and bioware with Essence tracking, and karma-to-nuyen conversion.
-- **Table rules toggles** for rules that differ between printings (Berlin 2023 defaults shown first):
-  - availability cap: 7 or 6
-  - astral initiative: 3D6 or 2D6
-  - whether extra spells/complex forms can be bought with karma at creation
-  - whether extra contact points can be bought with karma (Sixth World Companion option)
+- **Rules as written by default**, with page references in the code, plus optional house-rule switches:
+  - availability cap of 7 instead of 6
+  - extra spells/complex forms bought with karma at creation (allowed in the original 2019 book)
+  - extra contact points bought with karma (Sixth World Companion option)
 - **Print or save as PDF** from a clean printable sheet.
 - Works on desktop and phone.
 

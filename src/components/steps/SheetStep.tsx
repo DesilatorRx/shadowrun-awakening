@@ -80,6 +80,7 @@ export function SheetStep({ c, issues }: { c: Character; issues: Issue[] }) {
                 <tr><td>Matrix (VR)</td><td className="num small">{d.matrixInitVR}</td></tr>
                 {c.magicType !== 'mundane' && c.magicType !== 'technomancer' && <tr><td>Astral</td><td className="num">{d.astralInit}</td></tr>}
                 <tr><td>Defense Rating</td><td className="num">{d.defenseRating}</td></tr>
+                <tr><td>Unarmed AR</td><td className="num">{d.unarmedAR}</td></tr>
                 <tr><td>Composure</td><td className="num">{d.composure}</td></tr>
                 <tr><td>Judge Intentions</td><td className="num">{d.judgeIntentions}</td></tr>
                 <tr><td>Memory</td><td className="num">{d.memory}</td></tr>
@@ -119,7 +120,11 @@ export function SheetStep({ c, issues }: { c: Character; issues: Issue[] }) {
             </table>
             <h3>Knowledge & languages</h3>
             <p className="small">
-              {[...c.languages.map(l => `${l.name} (${l.native ? 'Native' : ['', 'Basic', 'Specialist', 'Expert'][Math.max(1, l.level)]})`), ...c.knowledge.map(k => k.name)].join(', ') || '—'}
+              {[
+                ...c.languages.map(l => `${l.name} (${l.native ? 'Native' : ['', 'Basic', 'Specialist', 'Expert'][Math.max(1, l.level)]})`),
+                ...c.qualities.map(t => QUALITIES.find(q => q.id === t.id)?.grantsNativeLanguage).filter(Boolean).map(n => `${n} (Native)`),
+                ...c.knowledge.map(k => k.name),
+              ].join(', ') || '—'}
             </p>
           </div>
           <div>
@@ -128,7 +133,8 @@ export function SheetStep({ c, issues }: { c: Character; issues: Issue[] }) {
               {c.qualities.map(t => {
                 const q = QUALITIES.find(x => x.id === t.id)
                 if (!q) return null
-                const variant = q.options ? q.options[t.option ?? 0]?.label : q.maxLevel ? `level ${t.level}` : ''
+                const variant = [q.options ? q.options[t.option ?? 0]?.label : q.maxLevel ? `level ${t.level}` : '', t.attr ? ATTR_NAMES[t.attr] : '']
+                  .filter(Boolean).join(', ')
                 return <li key={t.uid}>{q.name}{variant && ` (${variant})`}{t.detail && `: ${t.detail}`} <span className="dim mono">[{q.positive ? '−' : '+'}{takenQualityKarma(q, t)}]</span></li>
               })}
               {c.qualities.length === 0 && <li className="dim">None</li>}

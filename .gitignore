@@ -25,3 +25,6 @@ dist-ssr
 
 # Third-party installers
 *.msi
+
+# Rulebooks (copyrighted; never commit)
+*.pdf

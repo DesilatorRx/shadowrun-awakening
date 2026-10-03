@@ -56,27 +56,20 @@ export function ConceptStep({ c, set }: StepProps) {
         }
       >
         <p className="small dim">
-          Defaults follow the Berlin City Edition core rulebook (2023), which includes all errata. These are the rules that
-          changed between printings. Adjust them if your table plays differently.
+          Defaults follow the Berlin City Edition core rulebook (2023) as written. Change these only if your GM uses
+          house rules or the original 2019 book.
         </p>
         <div className="stack">
           <label className="row">
             <span>Maximum Availability at creation</span>
             <select value={c.options.maxAvailability} onChange={e => setOpt({ maxAvailability: Number(e.target.value) as 6 | 7 })}>
-              <option value={7}>7 (Berlin 2023 / errata)</option>
-              <option value={6}>6 (original 2019 book)</option>
+              <option value={6}>6 (rules as written, p. 66)</option>
+              <option value={7}>7 (house rule)</option>
             </select>
           </label>
           <label className="row">
             <input type="checkbox" checked={c.options.karmaSpellsAtCreation} onChange={e => setOpt({ karmaSpellsAtCreation: e.target.checked })} />
             <span>Allow buying extra spells and complex forms with karma at creation (5 karma each)</span>
-          </label>
-          <label className="row">
-            <span>Astral initiative dice</span>
-            <select value={c.options.astralInitDice} onChange={e => setOpt({ astralInitDice: Number(e.target.value) as 2 | 3 })}>
-              <option value={3}>3D6 (Berlin 2023 / errata)</option>
-              <option value={2}>2D6 (original 2019 book)</option>
-            </select>
           </label>
           <label className="row">
             <input type="checkbox" checked={c.options.karmaForContacts} onChange={e => setOpt({ karmaForContacts: e.target.checked })} />
