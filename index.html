@@ -4,14 +4,69 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Free, open-source Shadowrun 6th Edition priority character generator. Built for Berlin and Seattle campaigns." />
+    <title>Shadowrun 6e Character Creator: Free SR6 Character Generator | Shadowrun Awakening</title>
+    <meta name="description" content="Free online Shadowrun 6th Edition (Sixth World) character creator. Priority character generation with live point budgets, rule checks, Berlin and Seattle City Edition qualities, gear, cyberware, spells and a printable character sheet. No install, no account." />
+    <meta name="keywords" content="Shadowrun character creator, Shadowrun 6e character generator, SR6 character builder, Shadowrun Sixth World, Shadowrun Berlin, Chummer alternative, Commlink6 alternative" />
+    <link rel="canonical" href="https://desilatorrx.github.io/shadowrun-awakening/" />
+    <meta name="theme-color" content="#0b0e13" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Shadowrun Awakening" />
+    <meta property="og:title" content="Shadowrun 6e Character Creator (free, in your browser)" />
+    <meta property="og:description" content="Build Shadowrun Sixth World runners with priority creation, live budgets and rule checks. Berlin City Edition rules, printable sheets, no install." />
+    <meta property="og:url" content="https://desilatorrx.github.io/shadowrun-awakening/" />
+    <meta property="og:image" content="https://desilatorrx.github.io/shadowrun-awakening/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Shadowrun Awakening",
+        "alternateName": ["Shadowrun 6e Character Creator", "SR6 Character Generator"],
+        "url": "https://desilatorrx.github.io/shadowrun-awakening/",
+        "applicationCategory": "GameApplication",
+        "operatingSystem": "Any (web browser)",
+        "isAccessibleForFree": true,
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "description": "Free Shadowrun 6th Edition character creator with priority generation, rule validation, Berlin and Seattle City Edition content, and printable character sheets.",
+        "license": "https://opensource.org/licenses/MIT",
+        "codeRepository": "https://github.com/DesilatorRx/shadowrun-awakening"
+      }
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet" />
-    <title>Shadowrun Awakening</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Shown to search engines and before the app loads; React replaces it on start. -->
+      <main style="max-width: 720px; margin: 3rem auto; padding: 0 16px; font-family: system-ui, sans-serif; color: #dbe4ee; background: #0b0e13;">
+        <h1>Shadowrun 6e Character Creator</h1>
+        <p>
+          Shadowrun Awakening is a free, open-source character generator for <strong>Shadowrun, Sixth World</strong> (6th Edition).
+          Build a runner in your browser with the <strong>priority system</strong>: metatype, attributes, magic or resonance,
+          skills and resources, with live point budgets and rule checks at every step.
+        </p>
+        <h2>Features</h2>
+        <ul>
+          <li>Priority character creation using the Berlin City Edition core rules (2023)</li>
+          <li>Live budgets for adjustment points, attribute points, skill points, karma and nuyen</li>
+          <li>Rule validation: quality limits, skill caps, availability, Essence, incompatible cyberware</li>
+          <li>Metatypes, qualities (including Berlin and Seattle City Edition qualities), skills and specializations</li>
+          <li>Magicians, adepts, mystic adepts and technomancers: spells, adept powers, complex forms</li>
+          <li>Weapons, armor, commlinks, cyberdecks, cyberware and bioware with item details and book page references</li>
+          <li>Printable character sheet, JSON export and import, works on phones</li>
+        </ul>
+        <p>No install and no account. Characters are saved in your browser.
+          <a href="https://github.com/DesilatorRx/shadowrun-awakening" style="color: #2ee6d6;">Source code on GitHub</a>.</p>
+        <noscript><p>This character creator needs JavaScript enabled.</p></noscript>
+        <p style="font-size: 0.85em; color: #8b9bb0;">Unofficial fan tool. Shadowrun is a trademark of The Topps Company, Inc.; not affiliated with Catalyst Game Labs or Topps.</p>
+      </main>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

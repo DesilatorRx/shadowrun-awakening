@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://desilatorrx.github.io/shadowrun-awakening/sitemap.xml

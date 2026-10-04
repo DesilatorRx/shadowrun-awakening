@@ -1,6 +1,6 @@
-# Shadowrun Awakening
+# Shadowrun Awakening: free Shadowrun 6e character creator
 
-A free, open-source **Shadowrun Sixth World (SR6)** character generator that runs in your browser.
+A free, open-source **Shadowrun Sixth World (SR6 / 6th Edition) character creator** that runs in your browser. **Use it here: https://desilatorrx.github.io/shadowrun-awakening/**
 
 **Ruleset:** *Shadowrun, Sixth World Core Rulebook: City Edition - Berlin* (Catalyst Game Labs, November 2023), which includes all errata to that date. Creation rules were checked against that book, with page references in `src/engine/rules.ts`.
 
