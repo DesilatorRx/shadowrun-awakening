@@ -150,6 +150,27 @@ export function gearAvail(item: GearItem, rating?: number): number {
   return item.avail
 }
 
+const isAugmentation = (item: GearItem) => item.category === 'cyberware' || item.category === 'bioware'
+
+/** Max copies a character may own (augmentations default to one). */
+export function gearLimit(item: GearItem): number {
+  return item.maxCount ?? (isAugmentation(item) ? 1 : Infinity)
+}
+
+export function gearCount(c: Character, id: string): number {
+  return c.gear.filter(g => g.id === id).reduce((s, g) => s + g.qty, 0)
+}
+
+/** An owned item this one can't be installed alongside, if any. */
+export function gearConflict(c: Character, item: GearItem): GearItem | undefined {
+  for (const g of c.gear) {
+    const other = gearItem(g.id)
+    if (!other || other.id === item.id) continue
+    if (item.conflicts?.includes(other.id) || other.conflicts?.includes(item.id)) return other
+  }
+  return undefined
+}
+
 export function ownedGearCost(g: OwnedGear): number {
   const item = gearItem(g.id)
   return item ? gearUnitCost(item, g.rating) * g.qty : 0

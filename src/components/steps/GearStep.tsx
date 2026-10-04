@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
 import { GEAR } from '../../data'
 import {
-  computeBudget, essenceValue, gearAvail, gearEssence, gearItem, gearUnitCost, karmaToNuyenRate, remaining,
+  computeBudget, essenceValue, gearAvail, gearConflict, gearCount, gearEssence, gearItem, gearLimit, gearUnitCost,
+  karmaToNuyenRate, remaining,
 } from '../../engine/calc'
 import type { GearCategory, GearItem } from '../../engine/types'
 import { uid } from '../../state/store'
@@ -44,8 +45,23 @@ export function GearStep({ c, set }: StepProps) {
     return [...m.entries()]
   }, [catalog])
 
-  const add = (g: GearItem) =>
-    set(ch => ({ ...ch, gear: [...ch.gear, { uid: uid(), id: g.id, qty: 1, rating: g.rated?.min }] }))
+  const add = (g: GearItem) => set(ch => {
+    // Stackable gear: bump the existing row instead of adding a duplicate line.
+    const existing = !g.rated && gearLimit(g) === Infinity ? ch.gear.find(x => x.id === g.id) : undefined
+    if (existing) return { ...ch, gear: ch.gear.map(x => (x === existing ? { ...x, qty: x.qty + 1 } : x)) }
+    return { ...ch, gear: [...ch.gear, { uid: uid(), id: g.id, qty: 1, rating: g.rated?.min }] }
+  })
+
+  /** Why an item can't be added right now, or undefined if it can. */
+  const blockReason = (g: GearItem): string | undefined => {
+    if (gearAvail(g, g.rated?.min) > c.options.maxAvailability) return `Availability above ${c.options.maxAvailability}`
+    const limit = gearLimit(g)
+    if (gearCount(c, g.id) >= limit) return limit === 1 ? 'Already installed' : `Limit of ${limit} reached`
+    const clash = gearConflict(c, g)
+    if (clash) return `Can't combine with ${clash.name}`
+    if (gearUnitCost(g, g.rated?.min) > left) return 'Not enough nuyen'
+    return undefined
+  }
 
   const rate = karmaToNuyenRate(c)
 
@@ -87,7 +103,10 @@ export function GearStep({ c, set }: StepProps) {
                     <td className="num">
                       {item.rated ? <Stepper label={`${item.name} rating`} value={g.rating ?? item.rated.min} min={item.rated.min} max={item.rated.max} onChange={v => patch({ rating: v })} /> : '—'}
                     </td>
-                    <td className="num"><Stepper label={`${item.name} quantity`} value={g.qty} min={1} onChange={v => patch({ qty: v })} /></td>
+                    <td className="num">
+                      {gearLimit(item) === 1 ? <span className="faint">1</span>
+                        : <Stepper label={`${item.name} quantity`} value={g.qty} min={1} max={Math.min(999, gearLimit(item) - gearCount(c, item.id) + g.qty)} onChange={v => patch({ qty: v })} />}
+                    </td>
                     <td className={`num ${tooRare ? 'bad' : ''}`}>{availLabel(item, g.rating)}</td>
                     <td className="num">{ess ? ess.toFixed(2) : '—'}</td>
                     <td className="num">{nuyen(gearUnitCost(item, g.rating) * g.qty)}</td>
@@ -115,7 +134,8 @@ export function GearStep({ c, set }: StepProps) {
             <ul className="pick-list">
               {items.map(g => {
                 const cost = gearUnitCost(g, g.rated?.min)
-                const blocked = gearAvail(g, g.rated?.min) > c.options.maxAvailability
+                const reason = blockReason(g)
+                const blocked = !!reason && reason !== 'Not enough nuyen'
                 return (
                   <li key={g.id} className={`pick-row ${blocked ? 'blocked' : ''}`}>
                     <span className="pick-main">
@@ -123,12 +143,13 @@ export function GearStep({ c, set }: StepProps) {
                       <span className="small faint block">
                         {[g.stats, `Avail ${availLabel(g, g.rated?.min)}`, g.essence ? `Ess ${gearEssence(g, g.rated?.min)}` : null, g.rated ? `Rating ${g.rated.min}–${g.rated.max}` : null].filter(Boolean).join(' · ')}
                       </span>
+                      {reason && reason !== 'Not enough nuyen' && <span className="small warn block">{reason}</span>}
                     </span>
                     <button
                       type="button"
                       className="pick-add"
-                      disabled={blocked || cost > left}
-                      title={blocked ? `Availability above ${c.options.maxAvailability}` : cost > left ? 'Not enough nuyen' : undefined}
+                      disabled={!!reason}
+                      title={reason}
                       onClick={() => add(g)}
                       aria-label={`Add ${g.name}`}
                     >

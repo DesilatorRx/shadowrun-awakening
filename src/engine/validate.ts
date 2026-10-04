@@ -1,5 +1,6 @@
 import {
-  ATTR_NAMES, attrRange, attrValue, castsSpells, computeBudget, edgeValue, essenceValue, gearAvail, gearItem,
+  ATTR_NAMES, attrRange, attrValue, castsSpells, computeBudget, edgeValue, essenceValue, gearAvail, gearConflict,
+  gearCount, gearItem, gearLimit,
   magicOption, magicValue, metatypeOf, qualityById, remaining, resonanceValue, rowFor, skillById, skillRating,
 } from './calc'
 import { RULES } from './rules'
@@ -138,6 +139,19 @@ export function validate(c: Character): Issue[] {
     if (av > c.options.maxAvailability)
       err('gear', `${item.name} has Availability ${av}; the creation limit is ${c.options.maxAvailability}.`)
   }
+  const checked = new Set<string>()
+  for (const g of c.gear) {
+    const item = gearItem(g.id)
+    if (!item || checked.has(item.id)) continue
+    checked.add(item.id)
+    const n = gearCount(c, item.id)
+    if (n > gearLimit(item))
+      err('gear', gearLimit(item) === 1 ? `${item.name} can only be installed once (you have ${n}).` : `At most ${gearLimit(item)} × ${item.name} (you have ${n}).`)
+    const clash = gearConflict(c, item)
+    if (clash && !checked.has(clash.id)) err('gear', `${item.name} can't be combined with ${clash.name}.`)
+  }
+  if (c.gear.some(g => g.id.startsWith('wired_reflexes')) && c.gear.some(g => g.id === 'reaction_enhancers'))
+    warn('gear', 'Wired reflexes and reaction enhancers only work together while the wired reflexes are wireless.')
   if (essenceValue(c) <= 0) err('gear', 'Essence is zero or below. The character would die.')
 
   // Contacts

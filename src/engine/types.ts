@@ -150,6 +150,10 @@ export interface GearItem {
   defense?: number
   /** Armor that adds to worn body armor (helmets, shields) instead of replacing it. */
   stacks?: boolean
+  /** How many a character may have. Augmentations default to 1; other gear is unlimited. */
+  maxCount?: number
+  /** Item ids this can't be installed alongside (checked both ways). */
+  conflicts?: string[]
   rated?: { min: number; max: number }
   /** When rated, cost/essence/avail scale with rating. */
   perRating?: { cost?: number; essence?: number; avail?: number }

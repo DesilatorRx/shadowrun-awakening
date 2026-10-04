@@ -235,6 +235,33 @@ describe('validation', () => {
     expect(computeBudget(c).karma.spent).toBe(5)
   })
 
+  it('allows each augmentation only once (implant weapons twice)', () => {
+    const c = make(c => {
+      c.gear.push({ uid: uid(), id: 'datajack', qty: 1 }, { uid: uid(), id: 'datajack', qty: 1 })
+      c.gear.push({ uid: uid(), id: 'handblade', qty: 2 })
+      c.gear.push({ uid: uid(), id: 'ammo_light', qty: 40 })
+    })
+    const e = errors(c)
+    expect(e.some(m => m.includes('Datajack can only be installed once'))).toBe(true)
+    expect(e.some(m => m.includes('Handblade'))).toBe(false)
+    expect(e.some(m => m.includes('Ammo'))).toBe(false)
+  })
+
+  it('blocks augmentations the book says are incompatible', () => {
+    const c = make(c => {
+      c.gear.push({ uid: uid(), id: 'bone_lacing_titanium', qty: 1 }, { uid: uid(), id: 'bone_lacing_plastic', qty: 1 })
+      c.gear.push({ uid: uid(), id: 'synaptic_booster', qty: 1, rating: 1 }, { uid: uid(), id: 'wired_reflexes_1', qty: 1 })
+    })
+    const e = errors(c)
+    expect(e.filter(m => m.includes("can't be combined")).length).toBe(2)
+  })
+
+  it('lets wired reflexes run with reaction enhancers (wireless) with a warning', () => {
+    const c = make(c => { c.gear.push({ uid: uid(), id: 'wired_reflexes_1', qty: 1 }, { uid: uid(), id: 'reaction_enhancers', qty: 1, rating: 1 }) })
+    expect(errors(c).some(m => m.includes("can't be combined"))).toBe(false)
+    expect(validate(c).some(i => i.message.includes('wireless'))).toBe(true)
+  })
+
   it('requires each priority letter exactly once', () => {
     const c = make(c => { c.priorities.skills = 'A' })
     expect(errors(c).some(m => m.includes('exactly once'))).toBe(true)
