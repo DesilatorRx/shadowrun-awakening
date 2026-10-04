@@ -1,6 +1,7 @@
 import { ADEPT_POWERS, LIFESTYLES, MENTOR_SPIRITS, QUALITIES, SKILLS, TRADITIONS } from '../../data'
 import {
-  ATTR_NAMES, MAGIC_TYPE_NAMES, attrValue, computeBudget, computeDerived, formById, gearItem, metatypeOf,
+  ATTR_NAMES, MAGIC_TYPE_NAMES, attrValue, augmentedValue, computeBonuses, computeBudget, computeDerived, formById, gearItem,
+  metatypeOf,
   remaining, skillRating, spellById, takenQualityKarma,
 } from '../../engine/calc'
 import type { AttrId, Character } from '../../engine/types'
@@ -12,6 +13,7 @@ import { GearName } from '../GearInfo'
 export function SheetStep({ c, issues }: { c: Character; issues: Issue[] }) {
   const d = computeDerived(c)
   const b = computeBudget(c)
+  const bonuses = computeBonuses(c)
   const meta = metatypeOf(c)
   const errors = issues.filter(i => i.severity === 'error')
   const warnings = issues.length - errors.length
@@ -22,7 +24,7 @@ export function SheetStep({ c, issues }: { c: Character; issues: Issue[] }) {
   const pool = (attr: string, rating: number) =>
     ['mag', 'res', 'edg'].includes(attr)
       ? rating + (attr === 'mag' ? d.magic : attr === 'res' ? d.resonance : d.edge)
-      : rating + attrValue(c, attr as AttrId)
+      : rating + augmentedValue(c, attr as AttrId, bonuses)
 
   return (
     <div className="stack">
@@ -64,7 +66,12 @@ export function SheetStep({ c, issues }: { c: Character; issues: Issue[] }) {
             <h3>Attributes</h3>
             <table className="compact">
               <tbody>
-                {ATTRS.map(a => <tr key={a}><td>{ATTR_NAMES[a]}</td><td className="num">{attrValue(c, a)}</td></tr>)}
+                {ATTRS.map(a => (
+                  <tr key={a}>
+                    <td>{ATTR_NAMES[a]}</td>
+                    <td className="num">{attrValue(c, a)}{bonuses.attrs[a] > 0 && <span className="good"> ({attrValue(c, a) + bonuses.attrs[a]})</span>}</td>
+                  </tr>
+                ))}
                 <tr><td>Edge</td><td className="num">{d.edge}</td></tr>
                 <tr><td>Essence</td><td className="num">{d.essence.toFixed(2)}</td></tr>
                 {c.magicType !== 'mundane' && c.magicType !== 'technomancer' && <tr><td>Magic</td><td className="num">{d.magic}</td></tr>}
@@ -81,7 +88,7 @@ export function SheetStep({ c, issues }: { c: Character; issues: Issue[] }) {
                 <tr><td>Matrix (VR)</td><td className="num small">{d.matrixInitVR}</td></tr>
                 {c.magicType !== 'mundane' && c.magicType !== 'technomancer' && <tr><td>Astral</td><td className="num">{d.astralInit}</td></tr>}
                 <tr><td>Defense Rating</td><td className="num">{d.defenseRating}</td></tr>
-                <tr><td>Unarmed AR</td><td className="num">{d.unarmedAR}</td></tr>
+                <tr><td>Unarmed</td><td className="num">AR {d.unarmedAR} · DV {d.unarmedDV}</td></tr>
                 <tr><td>Composure</td><td className="num">{d.composure}</td></tr>
                 <tr><td>Judge Intentions</td><td className="num">{d.judgeIntentions}</td></tr>
                 <tr><td>Memory</td><td className="num">{d.memory}</td></tr>

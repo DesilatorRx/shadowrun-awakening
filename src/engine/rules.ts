@@ -43,6 +43,10 @@ export const RULES = {
   contactKarmaPerCharisma: 6,
 
   startingEssence: 6,
+  /** Augmentations can raise an attribute by at most this much (p. 37). */
+  maxAugmentation: 4,
+  /** Initiative Dice cap (p. 44). */
+  maxInitDice: 5,
 }
 
 /** Rules that differ between printings or tables; chosen per character. */

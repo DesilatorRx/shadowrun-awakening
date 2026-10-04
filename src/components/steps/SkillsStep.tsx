@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { QUALITIES, SKILLS } from '../../data'
-import { ATTR_NAMES, attrValue, computeBudget, remaining, skillRating } from '../../engine/calc'
+import { ATTR_NAMES, augmentedValue, computeBonuses, computeBudget, remaining, skillRating } from '../../engine/calc'
 import { RULES } from '../../engine/rules'
 import type { AttrId, Character, Language, SkillAlloc } from '../../engine/types'
 import { uid } from '../../state/store'
@@ -17,6 +17,7 @@ function writeSkill(c: Character, id: string, s: SkillAlloc): Character {
 
 export function SkillsStep({ c, set }: StepProps) {
   const b = computeBudget(c)
+  const bonuses = computeBonuses(c)
   const ptsLeft = remaining(b.skills)
   const karmaLeft = remaining(b.karma)
   const [newKnowledge, setNewKnowledge] = useState('')
@@ -30,7 +31,7 @@ export function SkillsStep({ c, set }: StepProps) {
 
   const dicePool = (attr: string, rating: number) => {
     if (attr === 'mag' || attr === 'res' || attr === 'edg') return null
-    return rating + attrValue(c, attr as AttrId)
+    return rating + augmentedValue(c, attr as AttrId, bonuses)
   }
 
   const setLang = (id: string, patch: Partial<Language>) =>

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { GEAR } from '../data'
 import { newCharacter, uid } from '../state/store'
-import { attrRange, attrValue, computeBudget, computeDerived, freeSpellCount, stepCost } from './calc'
+import { attrRange, attrValue, augmentedValue, computeBudget, computeDerived, freeSpellCount, stepCost } from './calc'
 import type { Character } from './types'
 import { validate } from './validate'
 
@@ -184,6 +184,52 @@ describe('Berlin City Edition (2023) rules as written', () => {
     expect(errors(c).some(m => m.includes('native language'))).toBe(false)
     c.languages.push({ id: 'x', name: 'Turkish', native: true, level: 0 })
     expect(errors(c).some(m => m.includes('Only one native language'))).toBe(true)
+  })
+})
+
+describe('augmentation effects', () => {
+  it('adds dermal plating rating and armor to Defense Rating', () => {
+    const c = make(c => {
+      c.attributes.bod = { points: 2, adjust: 0, karma: 0 } // 3
+      c.gear.push({ uid: uid(), id: 'dermal_plating', qty: 1, rating: 3 }, { uid: uid(), id: 'armor_jacket', qty: 1 })
+    })
+    expect(computeDerived(c).defenseRating).toBe(3 + 4 + 3)
+  })
+
+  it('raises Reaction and Initiative Dice with wired reflexes', () => {
+    const c = make(c => {
+      c.attributes.rea = { points: 2, adjust: 0, karma: 0 } // 3
+      c.attributes.int = { points: 1, adjust: 0, karma: 0 } // 2
+      c.gear.push({ uid: uid(), id: 'wired_reflexes_2', qty: 1 })
+    })
+    expect(computeDerived(c).initiative).toBe('7 + 3D6')
+  })
+
+  it('caps augmentation at +4 and Initiative Dice at 5D6', () => {
+    const c = make(c => {
+      c.gear.push({ uid: uid(), id: 'wired_reflexes_4', qty: 1 }, { uid: uid(), id: 'reaction_enhancers', qty: 1, rating: 4 })
+    })
+    expect(augmentedValue(c, 'rea')).toBe(1 + 4)
+    expect(computeDerived(c).initDice).toBe(5)
+  })
+
+  it('applies bone lacing to Defense Rating and unarmed attacks', () => {
+    const c = make(c => { c.gear.push({ uid: uid(), id: 'bone_lacing_titanium', qty: 1 }) })
+    const d = computeDerived(c)
+    expect(d.defenseRating).toBe(1 + 2)
+    expect(d.unarmedAR).toBe(1 + 1 + 3)
+    expect(d.unarmedDV).toBe('4P')
+  })
+
+  it('applies adept Improved Reflexes and Mystic Armor', () => {
+    const c = make(c => {
+      c.priorities = { metatype: 'D', attributes: 'B', magic: 'A', skills: 'C', resources: 'E' }
+      c.magicType = 'adept'
+      c.adeptPowers = [{ id: 'improved_reflexes', level: 2 }, { id: 'mystic_armor', level: 2 }]
+    })
+    const d = computeDerived(c)
+    expect(d.initiative).toBe('4 + 3D6')
+    expect(d.defenseRating).toBe(1 + 2)
   })
 })
 

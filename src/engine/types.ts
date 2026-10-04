@@ -115,6 +115,7 @@ export interface Spell {
 export interface AdeptPower {
   id: string
   name: string
+  effects?: ItemEffects
   /** Power point cost per level (or flat when not leveled). */
   cost: number
   maxLevel?: number
@@ -128,6 +129,16 @@ export interface ComplexForm {
 }
 
 export interface MentorSpirit { id: string; name: string }
+
+/** Bonuses an item or power grants. With `perRating`, numbers are multiplied by the rating/level. */
+export interface ItemEffects {
+  attrs?: Partial<Record<AttrId, number>>
+  initDice?: number
+  defense?: number
+  unarmedAR?: number
+  unarmedDV?: string
+  perRating?: boolean
+}
 
 export interface Lifestyle { id: string; name: string; cost: number }
 
@@ -150,6 +161,8 @@ export interface GearItem {
   defense?: number
   /** Armor that adds to worn body armor (helmets, shields) instead of replacing it. */
   stacks?: boolean
+  /** Game effects applied to derived stats while the item is owned. */
+  effects?: ItemEffects
   /** How many a character may have. Augmentations default to 1; other gear is unlimited. */
   maxCount?: number
   /** Item ids this can't be installed alongside (checked both ways). */

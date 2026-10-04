@@ -170,3 +170,8 @@ ul.plain li + li { margin-top: 0.2rem; }
 .pick-main { min-width: 0; }
 .pick-add { white-space: nowrap; flex: none; }
 @media print { .infotip-btn { display: none; } .gear-name { text-decoration: none; } }
+
+/* ---------- Bonuses ---------- */
+.glance-pair { display: contents; }
+.bonus-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.35rem; }
+.bonus-list li { display: flex; flex-direction: column; }

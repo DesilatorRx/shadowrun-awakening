@@ -1,5 +1,5 @@
 import {
-  ATTR_NAMES, attrRange, computeBudget, magicBase, metatypeOf, remaining, resonanceBase,
+  ATTR_NAMES, attrRange, computeBonuses, computeBudget, magicBase, metatypeOf, remaining, resonanceBase,
   stepCost,
 } from '../../engine/calc'
 import { RULES } from '../../engine/rules'
@@ -23,6 +23,7 @@ interface RowDef {
 export function AttributesStep({ c, set }: StepProps) {
   const meta = metatypeOf(c)
   const b = computeBudget(c)
+  const bonuses = computeBonuses(c)
   const adjLeft = remaining(b.adjustment)
   const ptsLeft = remaining(b.attributes)
   const karmaLeft = remaining(b.karma)
@@ -110,7 +111,14 @@ export function AttributesStep({ c, set }: StepProps) {
                       <Stepper label={`${r.name} karma`} value={r.alloc.karma} onChange={v => change('karma', v)} disabledUp={atCap || karmaLeft < nextKarma} />
                       {karmaSpent > 0 && <div className="small faint">{karmaSpent} karma</div>}
                     </td>
-                    <td className="num"><strong className="big-num">{val}</strong></td>
+                    <td className="num">
+                      <strong className="big-num">{val}</strong>
+                      {bonuses.attrs[r.key as keyof typeof bonuses.attrs] > 0 && (
+                        <div className="small good" title="Augmented value from implants or adept powers">
+                          aug {val + bonuses.attrs[r.key as keyof typeof bonuses.attrs]}
+                        </div>
+                      )}
+                    </td>
                     <td><Dots value={val} max={r.max} min={r.base} /></td>
                   </tr>
                 )

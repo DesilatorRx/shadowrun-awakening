@@ -1,5 +1,8 @@
 import { useMemo, useState } from 'react'
-import { MAGIC_TYPE_NAMES, computeBudget, computeDerived, metatypeOf, remaining, type Pool } from '../engine/calc'
+import {
+  ATTR_NAMES, MAGIC_TYPE_NAMES, attrValue, computeBonuses, computeBudget, computeDerived, metatypeOf, remaining, type Pool,
+} from '../engine/calc'
+import { ATTRS } from '../engine/types'
 import type { Character } from '../engine/types'
 import { validate, type StepId } from '../engine/validate'
 import { downloadJson } from '../state/storage'
@@ -103,6 +106,8 @@ export function Editor({ c, set, onClose }: { c: Character; set: Setter; onClose
 function BudgetPanel({ c }: { c: Character }) {
   const b = computeBudget(c)
   const d = computeDerived(c)
+  const bonuses = computeBonuses(c)
+  const boosted = ATTRS.filter(a => bonuses.attrs[a] > 0)
   const meta = metatypeOf(c)
   const row = (label: string, p: Pool, unit = '') => {
     const left = remaining(p)
@@ -136,12 +141,26 @@ function BudgetPanel({ c }: { c: Character }) {
         <dt>Metatype</dt><dd>{meta.name}</dd>
         <dt>Type</dt><dd>{MAGIC_TYPE_NAMES[c.magicType]}</dd>
         <dt>Initiative</dt><dd className="mono">{d.initiative}</dd>
-        <dt>Defense</dt><dd className="mono">{d.defenseRating}</dd>
+        <dt>Defense Rating</dt><dd className="mono">{d.defenseRating}</dd>
+        {boosted.map(a => (
+          <div key={a} className="glance-pair">
+            <dt>{ATTR_NAMES[a]}</dt>
+            <dd className="mono"><span className="faint">{attrValue(c, a)} →</span> <span className="good">{attrValue(c, a) + bonuses.attrs[a]}</span></dd>
+          </div>
+        ))}
         <dt>Phys / Stun</dt><dd className="mono">{d.physicalCM} / {d.stunCM}</dd>
         <dt>Essence</dt><dd className="mono">{d.essence.toFixed(2)}</dd>
         {d.magic > 0 && <><dt>Magic</dt><dd className="mono magic">{d.magic}</dd></>}
         {d.resonance > 0 && <><dt>Resonance</dt><dd className="mono magic">{d.resonance}</dd></>}
       </dl>
+      {bonuses.sources.length > 0 && (
+        <>
+          <h3>Bonuses</h3>
+          <ul className="bonus-list small">
+            {bonuses.sources.map(s => <li key={s.name}><span>{s.name}</span><span className="good">{s.text}</span></li>)}
+          </ul>
+        </>
+      )}
     </aside>
   )
 }

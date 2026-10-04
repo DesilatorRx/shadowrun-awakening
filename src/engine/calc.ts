@@ -3,8 +3,8 @@ import {
 } from '../data'
 import { RULES } from './rules'
 import type {
-  AnyAttrId, AttrAlloc, AttrId, Character, GearItem, MagicOption, MagicType, Metatype, OwnedGear, Priority,
-  PriorityCategory, PriorityRow, Quality, Range, TakenQuality,
+  AnyAttrId, AttrAlloc, AttrId, Character, GearItem, ItemEffects, MagicOption, MagicType, Metatype, OwnedGear,
+  Priority, PriorityCategory, PriorityRow, Quality, Range, TakenQuality,
 } from './types'
 import { ATTRS } from './types'
 
@@ -361,6 +361,61 @@ export function computeBudget(c: Character): Budget {
 }
 
 // ---------------------------------------------------------------------------
+// Augmentation and power effects
+
+export interface Bonuses {
+  attrs: Record<AttrId, number>
+  initDice: number
+  defense: number
+  unarmedAR: number
+  unarmedDV?: string
+  /** Where each bonus came from, for display. */
+  sources: { name: string; text: string }[]
+}
+
+function describe(e: ItemEffects, n: number): string {
+  const parts: string[] = []
+  for (const [a, v] of Object.entries(e.attrs ?? {})) parts.push(`+${v * n} ${ATTR_NAMES[a as AttrId]}`)
+  if (e.initDice) parts.push(`+${e.initDice * n}D6 Initiative`)
+  if (e.defense) parts.push(`+${e.defense * n} Defense`)
+  if (e.unarmedAR) parts.push(`unarmed AR +${e.unarmedAR}, DV ${e.unarmedDV}`)
+  return parts.join(', ')
+}
+
+export function computeBonuses(c: Character): Bonuses {
+  const b: Bonuses = {
+    attrs: { bod: 0, agi: 0, rea: 0, str: 0, wil: 0, log: 0, int: 0, cha: 0 },
+    initDice: 0, defense: 0, unarmedAR: 0, sources: [],
+  }
+  const apply = (name: string, e: ItemEffects | undefined, level: number) => {
+    if (!e) return
+    const n = e.perRating ? Math.max(1, level) : 1
+    for (const [a, v] of Object.entries(e.attrs ?? {})) b.attrs[a as AttrId] += v * n
+    b.initDice += (e.initDice ?? 0) * n
+    b.defense += (e.defense ?? 0) * n
+    if (e.unarmedAR && e.unarmedAR > b.unarmedAR) { b.unarmedAR = e.unarmedAR; b.unarmedDV = e.unarmedDV }
+    b.sources.push({ name, text: describe(e, n) })
+  }
+  for (const g of c.gear) {
+    const item = gearItem(g.id)
+    if (item?.effects) apply(item.name + (item.rated ? ` ${g.rating ?? item.rated.min}` : ''), item.effects, g.rating ?? item.rated?.min ?? 1)
+  }
+  if (hasPowers(c.magicType)) {
+    for (const t of c.adeptPowers) {
+      const p = ADEPT_POWERS.find(x => x.id === t.id)
+      if (p?.effects) apply(`${p.name} ${t.level}`, p.effects, t.level)
+    }
+  }
+  for (const a of ATTRS) b.attrs[a] = Math.min(RULES.maxAugmentation, b.attrs[a])
+  return b
+}
+
+/** Attribute including augmentation bonuses (natural value + bonus, bonus capped at +4). */
+export function augmentedValue(c: Character, a: AttrId, bonuses = computeBonuses(c)): number {
+  return attrValue(c, a) + bonuses.attrs[a]
+}
+
+// ---------------------------------------------------------------------------
 // Derived stats
 
 export interface Derived {
@@ -383,6 +438,8 @@ export interface Derived {
   resonance: number
   edge: number
   armor: number
+  initDice: number
+  unarmedDV: string
 }
 
 /** Best body armor plus all stacking pieces (helmets, shields). */
@@ -399,24 +456,28 @@ export function armorValue(c: Character): number {
 }
 
 export function computeDerived(c: Character): Derived {
-  const v = (a: AttrId) => attrValue(c, a)
+  const bonuses = computeBonuses(c)
+  const v = (a: AttrId) => augmentedValue(c, a, bonuses)
   const meta = metatypeOf(c)
   const armor = armorValue(c)
+  const dice = Math.min(RULES.maxInitDice, 1 + bonuses.initDice)
   const builtTough = (meta.builtTough ?? 0) + qualityLevels(c, 'built_tough')
   const glassJaw = qualityLevels(c, 'glass_jaw')
   const dermal = (meta.defenseBonus ?? 0) + (c.qualities.some(q => q.id === 'dermal_deposits') ? 1 : 0)
   return {
-    initiative: `${v('rea') + v('int')} + 1D6`,
-    matrixInitAR: `${v('rea') + v('int')} + 1D6`,
+    initiative: `${v('rea') + v('int')} + ${dice}D6`,
+    matrixInitAR: `${v('rea') + v('int')} + ${dice}D6`,
     matrixInitVR: c.magicType === 'technomancer'
       ? `${v('log') + v('int')} + 2D6 cold / 3D6 hot`
       : `Data Processing + ${v('int')} + 2D6 cold / 3D6 hot`,
     astralInit: `${v('log') + v('int')} + 2D6`,
     physicalCM: 8 + Math.ceil(v('bod') / 2) + builtTough,
     stunCM: Math.max(2, 8 + Math.ceil(v('wil') / 2) - glassJaw),
-    unarmedAR: v('rea') + v('str'),
+    unarmedAR: v('rea') + v('str') + bonuses.unarmedAR,
+    unarmedDV: bonuses.unarmedDV ?? (dermal ? '2P' : '2S'),
+    initDice: dice,
     overflow: v('bod') * 2 + 2 * qualityLevels(c, 'will_to_live'),
-    defenseRating: v('bod') + armor + dermal,
+    defenseRating: v('bod') + armor + dermal + bonuses.defense,
     composure: v('wil') + v('cha'),
     judgeIntentions: v('wil') + v('int'),
     memory: v('log') + v('int'),
