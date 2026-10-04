@@ -2,6 +2,12 @@ import { BERLIN_2023_OPTIONS, ORIGINAL_2019_OPTIONS, type TableOptions } from '.
 import type { Character } from '../../engine/types'
 import { Section, type StepProps } from '../ui'
 
+const LEVELS: { id: NonNullable<TableOptions['powerLevel']>; name: string; blurb: string }[] = [
+  { id: 'street', name: 'Street Level', blurb: 'Every priority pays the row below it (A gives B, … E stays E). Gritty, low-powered start.' },
+  { id: 'standard', name: 'Standard', blurb: 'Normal priority values and 50 karma to customize.' },
+  { id: 'prime', name: 'Prime Runner', blurb: 'Normal priorities with 100 karma to customize instead of 50.' },
+]
+
 const SETTINGS: { id: Character['setting']; name: string; blurb: string }[] = [
   { id: 'berlin', name: 'Berlin', blurb: 'The Flux State, Kieze, corp sectors. Unlocks Berlin qualities and contacts.' },
   { id: 'seattle', name: 'Seattle', blurb: 'Unlocks Seattle City Edition qualities.' },
@@ -44,6 +50,24 @@ export function ConceptStep({ c, set }: StepProps) {
             </button>
           ))}
         </div>
+      </Section>
+
+      <Section title="Level of play">
+        <div className="choice-grid">
+          {LEVELS.map(l => (
+            <button
+              type="button"
+              key={l.id}
+              className={`choice ${(c.options.powerLevel ?? 'standard') === l.id ? 'selected' : ''}`}
+              aria-pressed={(c.options.powerLevel ?? 'standard') === l.id}
+              onClick={() => setOpt({ powerLevel: l.id })}
+            >
+              <strong>{l.name}</strong>
+              <span className="small dim">{l.blurb}</span>
+            </button>
+          ))}
+        </div>
+        <p className="small dim">Ask your GM which level the campaign uses (book p. 63).</p>
       </Section>
 
       <Section

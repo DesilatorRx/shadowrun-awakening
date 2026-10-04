@@ -1,5 +1,5 @@
 import { METATYPES, PRIORITY_TABLE } from '../../data'
-import { MAGIC_TYPE_NAMES, priorityRow } from '../../engine/calc'
+import { MAGIC_TYPE_NAMES, paidRow } from '../../engine/calc'
 import type { Character, MagicType, Priority, PriorityCategory } from '../../engine/types'
 import { PRIORITIES, PRIORITY_CATEGORIES } from '../../engine/types'
 import { Section, type StepProps } from '../ui'
@@ -13,8 +13,8 @@ const CAT_LABEL: Record<PriorityCategory, string> = {
   resources: 'Resources',
 }
 
-function cellText(cat: PriorityCategory, p: Priority): string[] {
-  const r = priorityRow(p)
+function cellText(c: Character, cat: PriorityCategory, p: Priority): string[] {
+  const r = paidRow(c, p)
   switch (cat) {
     case 'metatype':
       return Object.entries(r.metatypes).map(([id, adj]) => `${METATYPES.find(m => m.id === id)?.name ?? id} (${adj})`)
@@ -37,9 +37,9 @@ function assign(c: Character, cat: PriorityCategory, p: Priority): Character {
 
 /** Keep metatype & magic choices legal after priorities change. */
 function fixSelections(c: Character): Character {
-  const metaRow = priorityRow(c.priorities.metatype)
+  const metaRow = paidRow(c, c.priorities.metatype)
   const metatype = metaRow.metatypes[c.metatype] !== undefined ? c.metatype : Object.keys(metaRow.metatypes)[0]
-  const magicRow = priorityRow(c.priorities.magic)
+  const magicRow = paidRow(c, c.priorities.magic)
   const magicType: MagicType = magicRow.magic.some(o => o.type === c.magicType)
     ? c.magicType
     : 'mundane'
@@ -47,12 +47,18 @@ function fixSelections(c: Character): Character {
 }
 
 export function PrioritiesStep({ c, set }: StepProps) {
-  const metaRow = priorityRow(c.priorities.metatype)
-  const magicRow = priorityRow(c.priorities.magic)
+  const metaRow = paidRow(c, c.priorities.metatype)
+  const magicRow = paidRow(c, c.priorities.magic)
 
   return (
     <div className="stack">
-      <Section title="Priority table" aside={<span className="small dim">Click a cell to assign. Letters swap automatically.</span>}>
+      <Section
+        title="Priority table"
+        aside={<span className="small dim">
+          {c.options.powerLevel === 'street' && <span className="warn">Street level: each letter pays the row below. </span>}
+          Click a cell to assign. Letters swap automatically.
+        </span>}
+      >
         <div className="table-wrap">
           <table className="prio-table">
             <thead>
@@ -75,7 +81,7 @@ export function PrioritiesStep({ c, set }: StepProps) {
                           aria-pressed={selected}
                           onClick={() => set(ch => assign(ch, cat, p))}
                         >
-                          {cellText(cat, p).map(t => <span key={t}>{t}</span>)}
+                          {cellText(c, cat, p).map(t => <span key={t}>{t}</span>)}
                         </button>
                       </td>
                     )

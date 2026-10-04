@@ -31,8 +31,19 @@ export function priorityRow(p: Priority): PriorityRow {
   return PRIORITY_TABLE.find(r => r.priority === p)!
 }
 
+/** Street-level play pays every priority from the row below it; E stays E (p. 63). */
+export function paidRow(c: Character, p: Priority): PriorityRow {
+  if (c.options.powerLevel !== 'street') return priorityRow(p)
+  const order: Priority[] = ['A', 'B', 'C', 'D', 'E']
+  return priorityRow(order[Math.min(4, order.indexOf(p) + 1)])
+}
+
 export function rowFor(c: Character, cat: PriorityCategory): PriorityRow {
-  return priorityRow(c.priorities[cat])
+  return paidRow(c, c.priorities[cat])
+}
+
+export function startingKarma(c: Character): number {
+  return c.options.powerLevel === 'prime' ? RULES.primeRunnerKarma : RULES.startingKarma
 }
 
 export function metatypeOf(c: Character): Metatype {
@@ -380,7 +391,7 @@ export function computeBudget(c: Character): Budget {
     adjustment: { total: adjTotal, spent: adjSpent },
     attributes: { total: rowFor(c, 'attributes').attributes, spent: attrSpent },
     skills: { total: rowFor(c, 'skills').skills, spent: skillPointsSpent(c) },
-    karma: { total: RULES.startingKarma + negative, spent: karmaBreakdown.reduce((s, b) => s + b.karma, 0) },
+    karma: { total: startingKarma(c) + negative, spent: karmaBreakdown.reduce((s, b) => s + b.karma, 0) },
     nuyen: {
       total: rowFor(c, 'resources').resources + c.karmaToNuyen * karmaToNuyenRate(c),
       spent: nuyenBreakdown.reduce((s, b) => s + b.nuyen, 0),

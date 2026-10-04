@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { QUALITIES, SKILLS } from '../../data'
-import { ATTR_NAMES, computeBudget, metatypeOf, takenQualityKarma } from '../../engine/calc'
+import { ATTR_NAMES, computeBudget, metatypeOf, startingKarma, takenQualityKarma } from '../../engine/calc'
 import { RULES } from '../../engine/rules'
 import type { AttrId, Quality, TakenQuality } from '../../engine/types'
 import { ATTRS } from '../../engine/types'
@@ -120,7 +120,7 @@ export function QualitiesStep({ c, set }: StepProps) {
         </div>
         <p className="small dim">
           Up to {RULES.maxQualities} qualities. Negative qualities can net you at most {RULES.maxNetQualityKarma} bonus karma.
-          Positive qualities are paid from your {RULES.startingKarma} starting karma.
+          Positive qualities are paid from your {startingKarma(c)} starting karma.
         </p>
       </Section>
 

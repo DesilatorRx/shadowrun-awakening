@@ -139,7 +139,7 @@ describe('derived stats', () => {
 describe('Berlin City Edition (2023) rules as written', () => {
   it('defaults new characters to the book rules', () => {
     const c = newCharacter('seattle')
-    expect(c.options).toEqual({ maxAvailability: 6, karmaSpellsAtCreation: false, karmaForContacts: false })
+    expect(c.options).toEqual({ maxAvailability: 6, karmaSpellsAtCreation: false, karmaForContacts: false, powerLevel: 'standard' })
   })
 
   it('uses Logic + Intuition + 2D6 astral initiative (p. 161)', () => {
@@ -184,6 +184,30 @@ describe('Berlin City Edition (2023) rules as written', () => {
     expect(errors(c).some(m => m.includes('native language'))).toBe(false)
     c.languages.push({ id: 'x', name: 'Turkish', native: true, level: 0 })
     expect(errors(c).some(m => m.includes('Only one native language'))).toBe(true)
+  })
+})
+
+describe('level of play (p. 63)', () => {
+  it('street level pays each priority from the row below, E stays E', () => {
+    const c = make(c => {
+      c.options.powerLevel = 'street'
+      c.priorities = { metatype: 'B', attributes: 'A', magic: 'E', skills: 'C', resources: 'D' }
+      c.metatype = 'elf'
+    })
+    const b = computeBudget(c)
+    expect(b.attributes.total).toBe(16) // A pays B
+    expect(b.skills.total).toBe(16) // C pays D
+    expect(b.nuyen.total).toBe(8_000) // D pays E
+    expect(b.adjustment.total).toBe(9) // elf at B pays C
+  })
+
+  it('prime runners get 100 karma', () => {
+    const c = make(c => { c.options.powerLevel = 'prime' })
+    expect(computeBudget(c).karma.total).toBe(100)
+  })
+
+  it('keeps the creation availability cap at 6 (p. 66)', () => {
+    expect(newCharacter('berlin').options.maxAvailability).toBe(6)
   })
 })
 

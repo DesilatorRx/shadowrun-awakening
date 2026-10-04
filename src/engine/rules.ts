@@ -4,6 +4,8 @@
 
 export const RULES = {
   startingKarma: 50,
+  /** Prime runner play doubles customization karma (p. 63). */
+  primeRunnerKarma: 100,
   /** Leftover karma carried into play (p. 66). */
   maxKarmaCarryover: 5,
   /** Karma cost to raise an attribute or active skill to the new rating = rating × this. */
@@ -57,6 +59,8 @@ export interface TableOptions {
   karmaSpellsAtCreation: boolean
   /** Contact points beyond the free pool cost 1 karma each (Sixth World Companion option). */
   karmaForContacts: boolean
+  /** Level of play (p. 63): street pays each priority from the row below; prime gets 100 karma. */
+  powerLevel?: 'street' | 'standard' | 'prime'
 }
 
 /** Default: Berlin City Edition (2023), rules as written. */
@@ -64,6 +68,7 @@ export const BERLIN_2023_OPTIONS: TableOptions = {
   maxAvailability: 6,
   karmaSpellsAtCreation: false,
   karmaForContacts: false,
+  powerLevel: 'standard',
 }
 
 /** For tables still using the original 2019 core rulebook, which allowed karma-bought spells. */
@@ -71,6 +76,7 @@ export const ORIGINAL_2019_OPTIONS: TableOptions = {
   maxAvailability: 6,
   karmaSpellsAtCreation: true,
   karmaForContacts: false,
+  powerLevel: 'standard',
 }
 
 export type Rules = typeof RULES
