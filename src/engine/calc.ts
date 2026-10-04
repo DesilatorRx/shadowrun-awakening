@@ -105,6 +105,21 @@ function attrKarmaCost(base: number, alloc: AttrAlloc): number {
 // ---------------------------------------------------------------------------
 // Skills
 
+/** Skill chosen for a skill quality (falls back to matching free-text detail from older saves). */
+export function qualitySkill(c: Character, qualityId: string): string[] {
+  return c.qualities.filter(t => t.id === qualityId).map(t => {
+    if (t.skill) return t.skill
+    const d = t.detail?.toLowerCase() ?? ''
+    return SKILLS.find(s => d.includes(s.name.toLowerCase()))?.id ?? ''
+  }).filter(Boolean)
+}
+
+/** Highest rank a skill may have at creation: 6, or 7 with Aptitude, or 0 with Incompetent (pp. 65, 70, 76). */
+export function skillCap(c: Character, id: string): number {
+  if (qualitySkill(c, 'incompetent').includes(id)) return 0
+  return RULES.maxSkillRating + (qualitySkill(c, 'aptitude').includes(id) ? 1 : 0)
+}
+
 export function skillRating(c: Character, id: string): number {
   const s = c.skills[id]
   return s ? s.points + s.karma : 0

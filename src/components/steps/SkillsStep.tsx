@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { QUALITIES, SKILLS } from '../../data'
-import { ATTR_NAMES, augmentedValue, computeBonuses, computeBudget, remaining, skillRating } from '../../engine/calc'
+import {
+  ATTR_NAMES, augmentedValue, computeBonuses, computeBudget, qualitySkill, remaining, skillCap, skillRating,
+} from '../../engine/calc'
 import { RULES } from '../../engine/rules'
 import type { AttrId, Character, Language, SkillAlloc } from '../../engine/types'
 import { uid } from '../../state/store'
@@ -65,7 +67,10 @@ export function SkillsStep({ c, set }: StepProps) {
               {visible.map(skill => {
                 const s: SkillAlloc = c.skills[skill.id] ?? { points: 0, karma: 0 }
                 const rating = skillRating(c, skill.id)
-                const atCap = rating >= RULES.maxSkillRating + 1
+                const cap = skillCap(c, skill.id)
+                const atCap = rating >= cap
+                const aptitude = qualitySkill(c, 'aptitude').includes(skill.id)
+                const incompetent = cap === 0
                 const nextKarma = (rating + 1) * RULES.skillKarmaPerRating
                 const pool = dicePool(skill.attr, rating)
                 return (
@@ -73,6 +78,8 @@ export function SkillsStep({ c, set }: StepProps) {
                     <th scope="row">
                       {skill.name}
                       {!skill.untrained && <span className="pill small" title="Cannot be used untrained"> trained only</span>}
+                      {aptitude && <span className="pill accent small" title="Aptitude: may start at 7"> Aptitude</span>}
+                      {incompetent && <span className="pill hot small" title="Incompetent: no ranks allowed"> Incompetent</span>}
                     </th>
                     <td className="num dim">{ATTR_NAMES[skill.attr].slice(0, 3)}</td>
                     <td className="num">

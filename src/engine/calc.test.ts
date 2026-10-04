@@ -308,6 +308,28 @@ describe('validation', () => {
     expect(validate(c).some(i => i.message.includes('wireless'))).toBe(true)
   })
 
+  it('lets the Aptitude skill start at 7, and only that skill', () => {
+    const c = make(c => {
+      c.qualities.push({ uid: uid(), id: 'aptitude', level: 1, skill: 'firearms' })
+      c.skills.firearms = { points: 7, karma: 0 }
+      c.skills.stealth = { points: 7, karma: 0 }
+    })
+    const e = errors(c)
+    expect(e.some(m => m.includes('Firearms 7 exceeds'))).toBe(false)
+    expect(e.some(m => m.includes('Stealth 7 exceeds the creation maximum of 6'))).toBe(true)
+  })
+
+  it('forbids ranks in an Incompetent skill and requires a skill choice', () => {
+    const c = make(c => {
+      c.qualities.push({ uid: uid(), id: 'incompetent', level: 1, skill: 'con' })
+      c.qualities.push({ uid: uid(), id: 'aptitude', level: 1 })
+      c.skills.con = { points: 1, karma: 0 }
+    })
+    const e = errors(c)
+    expect(e.some(m => m.includes("Incompetent in this skill"))).toBe(true)
+    expect(e.some(m => m.includes('Aptitude: choose a skill'))).toBe(true)
+  })
+
   it('requires each priority letter exactly once', () => {
     const c = make(c => { c.priorities.skills = 'A' })
     expect(errors(c).some(m => m.includes('exactly once'))).toBe(true)

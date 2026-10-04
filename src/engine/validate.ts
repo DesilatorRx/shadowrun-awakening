@@ -1,7 +1,8 @@
 import {
   ATTR_NAMES, attrRange, attrValue, castsSpells, computeBudget, edgeValue, essenceValue, gearAvail, gearConflict,
   gearCount, gearItem, gearLimit,
-  magicOption, magicValue, metatypeOf, qualityById, remaining, resonanceValue, rowFor, skillById, skillRating,
+  magicOption, magicValue, metatypeOf, qualityById, qualitySkill, remaining, resonanceValue, rowFor, skillById, skillCap,
+  skillRating,
 } from './calc'
 import { RULES } from './rules'
 import type { Character } from './types'
@@ -99,9 +100,9 @@ export function validate(c: Character): Issue[] {
     const skill = skillById(id)
     if (!skill) continue
     const r = skillRating(c, id)
-    const hasAptitude = c.qualities.some(q => q.id === 'aptitude' && q.detail?.toLowerCase().includes(skill.name.toLowerCase()))
-    const cap = RULES.maxSkillRating + (hasAptitude ? 1 : 0)
-    if (r > cap) err('skills', `${skill.name} ${r} exceeds the creation maximum of ${cap}.`)
+    const cap = skillCap(c, id)
+    if (cap === 0 && r > 0) err('skills', `${skill.name}: you're Incompetent in this skill and can't have ranks in it.`)
+    else if (r > cap) err('skills', `${skill.name} ${r} exceeds the creation maximum of ${cap}.`)
     if (r >= RULES.maxSkillRating) skillsAtCap++
     if (s.specialization && r === 0) err('skills', `${skill.name}: needs a rating before taking a specialization.`)
     if (skill.attr === 'mag' && !['magician', 'aspected', 'mysticAdept'].includes(c.magicType) && r > 0 && !(id === 'astral' && c.magicType === 'adept'))
@@ -125,11 +126,21 @@ export function validate(c: Character): Issue[] {
   for (const t of c.qualities) {
     const q = qualityById(t.id)
     if (!q) continue
+    if (q.skillChoice && !t.skill) err('qualities', `${q.name}: choose a skill.`)
     if (q.attributeChoice && !t.attr) err('qualities', `${q.name}: choose an attribute.`)
     else if (q.needsDetail && !t.detail?.trim()) warn('qualities', `${q.name}: describe the specifics.`)
     if (q.metatypes && !q.metatypes.includes(c.metatype)) err('qualities', `${q.name} isn't available to a ${meta.name}.`)
     if (q.id === 'sensitive_system' && c.magicType !== 'mundane') err('qualities', 'Sensitive System is only for mundane characters.')
+    if (q.id === 'incompetent' && t.skill) {
+      const sk = skillById(t.skill)
+      if (sk?.attr === 'mag' && c.magicType === 'mundane') err('qualities', `Incompetent: you can't pick ${sk.name} without a Magic rating.`)
+      if (sk?.attr === 'res' && c.magicType !== 'technomancer') err('qualities', `Incompetent: you can't pick ${sk.name} without a Resonance rating.`)
+    }
   }
+
+  const apt = qualitySkill(c, 'aptitude')
+  const inc = qualitySkill(c, 'incompetent')
+  for (const id of apt) if (inc.includes(id)) err('qualities', `You can't have both Aptitude and Incompetent in ${skillById(id)?.name}.`)
 
   // Gear
   for (const g of c.gear) {

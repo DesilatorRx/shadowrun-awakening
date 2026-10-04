@@ -83,6 +83,8 @@ export interface Quality {
   options?: { label: string; karma: number }[]
   /** Restricted to these metatypes. */
   metatypes?: MetatypeId[]
+  /** The quality applies to one chosen active skill (Aptitude, Incompetent). */
+  skillChoice?: boolean
   /** The quality applies to one chosen attribute (Exceptional, Impaired). */
   attributeChoice?: 'physicalMental'
   /** Change to the chosen attribute's maximum per level. */
@@ -189,7 +191,16 @@ export interface SkillAlloc {
 export interface KnowledgeSkill { id: string; name: string }
 export interface Language { id: string; name: string; native: boolean; level: 0 | 1 | 2 | 3 }
 
-export interface TakenQuality { uid: string; id: string; level: number; detail?: string; option?: number; attr?: AttrId }
+export interface TakenQuality {
+  uid: string
+  id: string
+  level: number
+  detail?: string
+  option?: number
+  attr?: AttrId
+  /** Chosen active skill id for skill qualities. */
+  skill?: string
+}
 export interface TakenPower { id: string; level: number }
 export interface OwnedGear { uid: string; id: string; qty: number; rating?: number }
 export interface Contact { uid: string; name: string; role: string; connection: number; loyalty: number }

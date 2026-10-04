@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { QUALITIES } from '../../data'
+import { QUALITIES, SKILLS } from '../../data'
 import { ATTR_NAMES, computeBudget, metatypeOf, takenQualityKarma } from '../../engine/calc'
 import { RULES } from '../../engine/rules'
 import type { AttrId, Quality, TakenQuality } from '../../engine/types'
@@ -94,7 +94,12 @@ export function QualitiesStep({ c, set }: StepProps) {
                       )}
                     </td>
                     <td>
-                      {q.attributeChoice ? (
+                      {q.skillChoice ? (
+                        <select aria-label={`${q.name} skill`} value={t.skill ?? ''} onChange={e => update(t, { skill: e.target.value || undefined })}>
+                          <option value="">Choose skill…</option>
+                          {SKILLS.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                        </select>
+                      ) : q.attributeChoice ? (
                         <select aria-label={`${q.name} attribute`} value={t.attr ?? ''} onChange={e => update(t, { attr: (e.target.value || undefined) as AttrId | undefined })}>
                           <option value="">Choose attribute…</option>
                           {ATTRS.map(a => <option key={a} value={a}>{ATTR_NAMES[a]}</option>)}

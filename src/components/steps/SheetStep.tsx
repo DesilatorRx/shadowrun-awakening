@@ -1,7 +1,7 @@
 import { ADEPT_POWERS, LIFESTYLES, MENTOR_SPIRITS, QUALITIES, SKILLS, TRADITIONS } from '../../data'
 import {
   ATTR_NAMES, MAGIC_TYPE_NAMES, attrValue, augmentedValue, computeBonuses, computeBudget, computeDerived, formById, gearItem,
-  metatypeOf,
+  metatypeOf, qualitySkill,
   remaining, skillRating, spellById, takenQualityKarma,
 } from '../../engine/calc'
 import type { AttrId, Character } from '../../engine/types'
@@ -21,6 +21,8 @@ export function SheetStep({ c, issues }: { c: Character; issues: Issue[] }) {
   const mentor = MENTOR_SPIRITS.find(m => m.id === c.mentorSpirit)
   const lifestyle = LIFESTYLES.find(l => l.id === c.lifestyle)
   const skills = SKILLS.filter(s => skillRating(c, s.id) > 0)
+  const aptitudeSkills = qualitySkill(c, 'aptitude')
+  const incompetentSkills = qualitySkill(c, 'incompetent')
   const pool = (attr: string, rating: number) =>
     ['mag', 'res', 'edg'].includes(attr)
       ? rating + (attr === 'mag' ? d.magic : attr === 'res' ? d.resonance : d.edge)
@@ -117,13 +119,19 @@ export function SheetStep({ c, issues }: { c: Character; issues: Issue[] }) {
                   const spec = c.skills[s.id]?.specialization
                   return (
                     <tr key={s.id}>
-                      <td>{s.name}{spec && <span className="small dim"> ({spec} +2)</span>}</td>
+                      <td>
+                        {s.name}{spec && <span className="small dim"> ({spec} +2)</span>}
+                        {aptitudeSkills.includes(s.id) && <span className="small good"> · Aptitude</span>}
+                      </td>
                       <td className="num">{r}</td>
                       <td className="num">{pool(s.attr, r)}</td>
                     </tr>
                   )
                 })}
                 {skills.length === 0 && <tr><td colSpan={3} className="dim">None</td></tr>}
+                {incompetentSkills.map(id => (
+                  <tr key={id}><td className="dim">{SKILLS.find(s => s.id === id)?.name} <span className="small bad">· Incompetent</span></td><td className="num">—</td><td className="num">—</td></tr>
+                ))}
               </tbody>
             </table>
             <h3>Knowledge & languages</h3>
@@ -141,7 +149,7 @@ export function SheetStep({ c, issues }: { c: Character; issues: Issue[] }) {
               {c.qualities.map(t => {
                 const q = QUALITIES.find(x => x.id === t.id)
                 if (!q) return null
-                const variant = [q.options ? q.options[t.option ?? 0]?.label : q.maxLevel ? `level ${t.level}` : '', t.attr ? ATTR_NAMES[t.attr] : '']
+                const variant = [q.options ? q.options[t.option ?? 0]?.label : q.maxLevel ? `level ${t.level}` : '', t.attr ? ATTR_NAMES[t.attr] : '', t.skill ? SKILLS.find(s => s.id === t.skill)?.name ?? '' : '']
                   .filter(Boolean).join(', ')
                 return <li key={t.uid}>{q.name}{variant && ` (${variant})`}{t.detail && `: ${t.detail}`} <span className="dim mono">[{q.positive ? '−' : '+'}{takenQualityKarma(q, t)}]</span></li>
               })}
