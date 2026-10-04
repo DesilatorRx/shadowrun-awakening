@@ -59,7 +59,7 @@ export const SKILLS: Skill[] = [
   { id: 'electronics', name: 'Electronics', attr: 'log', untrained: true, specializations: ['Computer', 'Hardware', 'Software', 'Complex Forms'] },
   { id: 'enchanting', name: 'Enchanting', attr: 'mag', untrained: false, specializations: ['Alchemy', 'Artificing', 'Disenchanting'] },
   { id: 'engineering', name: 'Engineering', attr: 'log', untrained: true, specializations: ['Aeronautics Mechanic', 'Armorer', 'Automotive Mechanic', 'Demolitions', 'Gunnery', 'Industrial Mechanic', 'Lockpicking', 'Nautical Mechanic'] },
-  { id: 'exotic_weapons', name: 'Exotic Weapons', attr: 'agi', untrained: false, specializations: ['Specific exotic weapon'] },
+  { id: 'exotic_weapons', name: 'Exotic Weapons', attr: 'agi', untrained: false, specializations: [] },
   { id: 'firearms', name: 'Firearms', attr: 'agi', untrained: true, specializations: ['Tasers', 'Holdouts', 'Light Pistols', 'Heavy Pistols', 'Machine Pistols', 'Submachine Guns', 'Rifles', 'Shotguns', 'Machine Guns', 'Assault Cannons'] },
   { id: 'influence', name: 'Influence', attr: 'cha', untrained: true, specializations: ['Etiquette', 'Instruction', 'Intimidation', 'Leadership', 'Negotiation'] },
   { id: 'outdoors', name: 'Outdoors', attr: 'int', untrained: true, specializations: ['Animal Handling', 'Navigation', 'Survival', 'Tracking', 'Urban', 'Woods', 'Desert'] },

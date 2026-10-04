@@ -330,6 +330,21 @@ describe('validation', () => {
     expect(e.some(m => m.includes('Aptitude: choose a skill'))).toBe(true)
   })
 
+  it('requires a named weapon for Exotic Weapons and charges per weapon', () => {
+    const c = make(c => { c.skills.exotic_weapons = { points: 2, karma: 0 } })
+    expect(errors(c).some(m => m.includes('Exotic Weapons: name the weapon'))).toBe(true)
+    c.skills.exotic_weapons = { points: 2, karma: 0, specialization: 'Blowgun', extraSpecs: ['Bolas'] }
+    expect(errors(c).some(m => m.includes('Exotic Weapons'))).toBe(false)
+    expect(computeBudget(c).skills.spent).toBe(2 + 2)
+  })
+
+  it('allows only one specialization on other skills, custom names welcome', () => {
+    const c = make(c => { c.skills.influence = { points: 3, karma: 0, specialization: 'Haggling with Kiez bosses' } })
+    expect(errors(c).some(m => m.includes('Influence'))).toBe(false)
+    c.skills.influence.extraSpecs = ['Leadership']
+    expect(errors(c).some(m => m.includes('only one specialization per skill'))).toBe(true)
+  })
+
   it('requires each priority letter exactly once', () => {
     const c = make(c => { c.priorities.skills = 'A' })
     expect(errors(c).some(m => m.includes('exactly once'))).toBe(true)

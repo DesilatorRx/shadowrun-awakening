@@ -105,6 +105,10 @@ export function validate(c: Character): Issue[] {
     else if (r > cap) err('skills', `${skill.name} ${r} exceeds the creation maximum of ${cap}.`)
     if (r >= RULES.maxSkillRating) skillsAtCap++
     if (s.specialization && r === 0) err('skills', `${skill.name}: needs a rating before taking a specialization.`)
+    if (id === 'exotic_weapons' && r > 0 && !s.specialization?.trim())
+      err('skills', 'Exotic Weapons: name the weapon you specialize in. You can only use the skill with weapons you have a specialization for.')
+    if (id !== 'exotic_weapons' && (s.extraSpecs?.length ?? 0) > 0)
+      err('skills', `${skill.name}: only one specialization per skill at creation.`)
     if (skill.attr === 'mag' && !['magician', 'aspected', 'mysticAdept'].includes(c.magicType) && r > 0 && !(id === 'astral' && c.magicType === 'adept'))
       err('skills', `${skill.name} requires a magician or mystic adept.`)
     if (skill.attr === 'res' && c.magicType !== 'technomancer' && r > 0) err('skills', `${skill.name} requires Resonance.`)

@@ -1,7 +1,7 @@
 import { ADEPT_POWERS, LIFESTYLES, MENTOR_SPIRITS, QUALITIES, SKILLS, TRADITIONS } from '../../data'
 import {
   ATTR_NAMES, MAGIC_TYPE_NAMES, attrValue, augmentedValue, computeBonuses, computeBudget, computeDerived, formById, gearItem,
-  metatypeOf, qualitySkill,
+  metatypeOf, qualitySkill, skillSpecs,
   remaining, skillRating, spellById, takenQualityKarma,
 } from '../../engine/calc'
 import type { AttrId, Character } from '../../engine/types'
@@ -116,7 +116,7 @@ export function SheetStep({ c, issues }: { c: Character; issues: Issue[] }) {
               <tbody>
                 {skills.map(s => {
                   const r = skillRating(c, s.id)
-                  const spec = c.skills[s.id]?.specialization
+                  const spec = skillSpecs(c.skills[s.id]).join(', ')
                   return (
                     <tr key={s.id}>
                       <td>

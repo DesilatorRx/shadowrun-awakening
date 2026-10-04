@@ -177,3 +177,6 @@ ul.plain li + li { margin-top: 0.2rem; }
 .bonus-list li { display: flex; flex-direction: column; }
 
 .skill-table th .pill { margin-left: 0.5em; }
+
+.spec-input { width: 11rem; }
+.stack-tight { display: inline-flex; flex-direction: column; gap: 4px; align-items: flex-start; }

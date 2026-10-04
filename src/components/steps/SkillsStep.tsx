@@ -10,9 +10,12 @@ import { PoolBadge, Section, Stepper, type StepProps } from '../ui'
 
 const LANGUAGE_LEVELS = ['Basic', 'Specialist', 'Expert'] as const
 
+const CUSTOM = '__custom__'
+
 function writeSkill(c: Character, id: string, s: SkillAlloc): Character {
   const skills = { ...c.skills }
-  if (s.points + s.karma === 0 && !s.specialization) delete skills[id]
+  // Specializations need ranks in the skill, so dropping to 0 removes the skill entirely.
+  if (s.points + s.karma === 0) delete skills[id]
   else skills[id] = s
   return { ...c, skills }
 }
@@ -91,15 +94,17 @@ export function SkillsStep({ c, set }: StepProps) {
                     <td className="num"><strong className="big-num">{rating}</strong></td>
                     <td>
                       <div className="row nowrap">
-                        <select
-                          aria-label={`${skill.name} specialization`}
-                          value={s.specialization ?? ''}
-                          disabled={rating === 0}
-                          onChange={e => set(ch => writeSkill(ch, skill.id, { ...s, specialization: e.target.value || undefined }))}
-                        >
-                          <option value="">—</option>
-                          {skill.specializations.map(sp => <option key={sp} value={sp}>{sp}</option>)}
-                        </select>
+                        {skill.id === 'exotic_weapons' ? (
+                          <ExoticSpecs disabled={rating === 0} s={s} onChange={v => set(ch => writeSkill(ch, skill.id, v))} />
+                        ) : (
+                          <SpecPicker
+                            label={skill.name}
+                            options={skill.specializations}
+                            value={s.specialization}
+                            disabled={rating === 0}
+                            onChange={v => set(ch => writeSkill(ch, skill.id, { ...s, specialization: v }))}
+                          />
+                        )}
                         {s.specialization && (
                           <label className="small dim nowrap" title="Pay for the specialization with karma instead of a skill point">
                             <input type="checkbox" checked={!!s.specKarma} onChange={e => set(ch => writeSkill(ch, skill.id, { ...s, specKarma: e.target.checked }))} /> karma
@@ -116,7 +121,8 @@ export function SkillsStep({ c, set }: StepProps) {
         </div>
         <p className="small dim">
           Max rating {RULES.maxSkillRating} at creation.
-          One specialization (+2 dice) per skill, costing {RULES.specializationSkillPoints} skill point or {RULES.specializationKarma} karma.
+          Specializations need at least 1 rank in the skill. One per skill (+2 dice), costing {RULES.specializationSkillPoints} skill point or {RULES.specializationKarma} karma.
+          Exotic Weapons is the exception: name each weapon, one specialization per weapon.
           Expertise can't be bought at creation. Aptitude raises one skill's cap to {RULES.maxSkillRating + 1}.
         </p>
       </Section>
@@ -189,5 +195,59 @@ export function SkillsStep({ c, set }: StepProps) {
         </form>
       </Section>
     </div>
+  )
+}
+
+/** Book specializations plus a GM-approved custom option (p. 92). */
+function SpecPicker({ label, options, value, disabled, onChange }: {
+  label: string
+  options: string[]
+  value?: string
+  disabled: boolean
+  onChange: (v: string | undefined) => void
+}) {
+  const isCustom = value !== undefined && !options.includes(value)
+  return (
+    <span className="row nowrap">
+      <select
+        aria-label={`${label} specialization`}
+        value={isCustom ? CUSTOM : value ?? ''}
+        disabled={disabled}
+        title={disabled ? 'Put at least 1 rank in the skill first' : undefined}
+        onChange={e => onChange(e.target.value === CUSTOM ? '' : e.target.value || undefined)}
+      >
+        <option value="">—</option>
+        {options.map(sp => <option key={sp} value={sp}>{sp}</option>)}
+        <option value={CUSTOM}>Custom (GM approved)…</option>
+      </select>
+      {isCustom && (
+        <input type="text" className="spec-input" aria-label={`${label} custom specialization`} placeholder="Specialization" value={value} onChange={e => onChange(e.target.value)} />
+      )}
+    </span>
+  )
+}
+
+/** Exotic Weapons: one specialization per weapon, at least one required (p. 96). */
+function ExoticSpecs({ s, disabled, onChange }: { s: SkillAlloc; disabled: boolean; onChange: (s: SkillAlloc) => void }) {
+  const all = [s.specialization ?? '', ...(s.extraSpecs ?? [])]
+  const write = (list: string[]) => onChange({ ...s, specialization: list[0] || undefined, extraSpecs: list.slice(1) })
+  if (disabled) return <span className="small faint" title="Put at least 1 rank in the skill first">needs a rank</span>
+  return (
+    <span className="stack-tight">
+      {all.map((w, i) => (
+        <span key={i} className="row nowrap">
+          <input
+            type="text"
+            className="spec-input"
+            aria-label={`Exotic weapon ${i + 1}`}
+            placeholder="Weapon, e.g. Blowgun"
+            value={w}
+            onChange={e => write(all.map((x, j) => (j === i ? e.target.value : x)))}
+          />
+          {i > 0 && <button type="button" className="ghost small" aria-label={`Remove exotic weapon ${i + 1}`} onClick={() => write(all.filter((_, j) => j !== i))}>×</button>}
+        </span>
+      ))}
+      <button type="button" className="ghost small" onClick={() => write([...all, ''])}>+ weapon</button>
+    </span>
   )
 }

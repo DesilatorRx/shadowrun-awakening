@@ -184,8 +184,10 @@ export interface SkillAlloc {
   points: number
   karma: number
   specialization?: string
-  /** True when the specialization is paid with karma instead of a skill point. */
+  /** True when specializations are paid with karma instead of skill points. */
   specKarma?: boolean
+  /** Additional specializations; only Exotic Weapons allows more than one (p. 96). */
+  extraSpecs?: string[]
 }
 
 export interface KnowledgeSkill { id: string; name: string }

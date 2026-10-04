@@ -125,11 +125,17 @@ export function skillRating(c: Character, id: string): number {
   return s ? s.points + s.karma : 0
 }
 
+/** All specializations on a skill (Exotic Weapons may have several). */
+export function skillSpecs(s: { specialization?: string; extraSpecs?: string[] } | undefined): string[] {
+  if (!s) return []
+  return [s.specialization, ...(s.extraSpecs ?? [])].filter((x): x is string => !!x?.trim())
+}
+
 function skillKarmaCost(c: Character): number {
   let k = 0
   for (const s of Object.values(c.skills)) {
     k += stepCost(s.points, s.points + s.karma, RULES.skillKarmaPerRating)
-    if (s.specialization && s.specKarma) k += RULES.specializationKarma
+    if (s.specKarma) k += skillSpecs(s).length * RULES.specializationKarma
   }
   return k
 }
@@ -138,7 +144,7 @@ function skillPointsSpent(c: Character): number {
   let p = 0
   for (const s of Object.values(c.skills)) {
     p += s.points
-    if (s.specialization && !s.specKarma) p += RULES.specializationSkillPoints
+    if (!s.specKarma) p += skillSpecs(s).length * RULES.specializationSkillPoints
   }
   return p
 }
