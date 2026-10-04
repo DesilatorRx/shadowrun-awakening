@@ -53,6 +53,10 @@ npm run build    # production build in dist/
 | `src/engine/validate.ts` | Creation rule checks. |
 | `src/components/` | React UI, one file per creation step. |
 
+## Roadmap
+
+See [ROADMAP.md](ROADMAP.md): GM mode for quick NPCs and grunt groups, career mode, and more build methods are planned.
+
 ## Contributing
 
 Found a wrong number? Fix it in `src/data/` and open a pull request, citing the book and page. Data was checked against the Berlin City Edition (2023); the gear catalog is still a subset of the book, so additions are welcome.

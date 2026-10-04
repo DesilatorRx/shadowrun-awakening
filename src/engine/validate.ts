@@ -106,7 +106,7 @@ export function validate(c: Character): Issue[] {
     if (r >= RULES.maxSkillRating) skillsAtCap++
     if (s.specialization && r === 0) err('skills', `${skill.name}: needs a rating before taking a specialization.`)
     if (id === 'exotic_weapons' && r > 0 && !s.specialization?.trim())
-      err('skills', 'Exotic Weapons: name the weapon you specialize in. You can only use the skill with weapons you have a specialization for.')
+      warn('skills', "Exotic Weapons has ranks but no weapon named. The skill only works with weapons you specialize in, so those ranks can't be used yet (p. 96).")
     if (id !== 'exotic_weapons' && (s.extraSpecs?.length ?? 0) > 0)
       err('skills', `${skill.name}: only one specialization per skill at creation.`)
     if (skill.attr === 'mag' && !['magician', 'aspected', 'mysticAdept'].includes(c.magicType) && r > 0 && !(id === 'astral' && c.magicType === 'adept'))

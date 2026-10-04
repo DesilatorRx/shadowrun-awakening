@@ -330,9 +330,10 @@ describe('validation', () => {
     expect(e.some(m => m.includes('Aptitude: choose a skill'))).toBe(true)
   })
 
-  it('requires a named weapon for Exotic Weapons and charges per weapon', () => {
+  it('warns when Exotic Weapons has no named weapon and charges per weapon', () => {
     const c = make(c => { c.skills.exotic_weapons = { points: 2, karma: 0 } })
-    expect(errors(c).some(m => m.includes('Exotic Weapons: name the weapon'))).toBe(true)
+    expect(errors(c).some(m => m.includes('Exotic Weapons'))).toBe(false)
+    expect(validate(c).some(i => i.severity === 'warning' && i.message.includes('no weapon named'))).toBe(true)
     c.skills.exotic_weapons = { points: 2, karma: 0, specialization: 'Blowgun', extraSpecs: ['Bolas'] }
     expect(errors(c).some(m => m.includes('Exotic Weapons'))).toBe(false)
     expect(computeBudget(c).skills.spent).toBe(2 + 2)
