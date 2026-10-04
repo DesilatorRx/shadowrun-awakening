@@ -5,6 +5,7 @@ import {
 } from '../../engine/calc'
 import type { GearCategory, GearItem } from '../../engine/types'
 import { uid } from '../../state/store'
+import { GearName } from '../GearInfo'
 import { PoolBadge, Section, Stepper, type StepProps } from '../ui'
 import { nuyen } from '../format'
 
@@ -82,7 +83,7 @@ export function GearStep({ c, set }: StepProps) {
                 const ess = gearEssence(item, g.rating) * g.qty
                 return (
                   <tr key={g.uid}>
-                    <td>{item.name}{item.stats && <div className="small faint">{item.stats}</div>}</td>
+                    <td><GearName item={item} rating={g.rating} />{item.stats && <div className="small faint">{item.stats}</div>}</td>
                     <td className="num">
                       {item.rated ? <Stepper label={`${item.name} rating`} value={g.rating ?? item.rated.min} min={item.rated.min} max={item.rated.max} onChange={v => patch({ rating: v })} /> : '—'}
                     </td>
@@ -116,15 +117,22 @@ export function GearStep({ c, set }: StepProps) {
                 const cost = gearUnitCost(g, g.rated?.min)
                 const blocked = gearAvail(g, g.rated?.min) > c.options.maxAvailability
                 return (
-                  <li key={g.id}>
-                    <button type="button" className="pick" disabled={blocked || cost > left} onClick={() => add(g)}>
-                      <span>
-                        {g.name}
-                        <span className="small faint block">
-                          {[g.stats, `Avail ${availLabel(g, g.rated?.min)}`, g.essence ? `Ess ${gearEssence(g, g.rated?.min)}` : null, g.rated ? `Rating ${g.rated.min}–${g.rated.max}` : null].filter(Boolean).join(' · ')}
-                        </span>
+                  <li key={g.id} className={`pick-row ${blocked ? 'blocked' : ''}`}>
+                    <span className="pick-main">
+                      <GearName item={g} />
+                      <span className="small faint block">
+                        {[g.stats, `Avail ${availLabel(g, g.rated?.min)}`, g.essence ? `Ess ${gearEssence(g, g.rated?.min)}` : null, g.rated ? `Rating ${g.rated.min}–${g.rated.max}` : null].filter(Boolean).join(' · ')}
                       </span>
-                      <span className="mono">{nuyen(cost)}{g.rated ? '/R' : ''}</span>
+                    </span>
+                    <button
+                      type="button"
+                      className="pick-add"
+                      disabled={blocked || cost > left}
+                      title={blocked ? `Availability above ${c.options.maxAvailability}` : cost > left ? 'Not enough nuyen' : undefined}
+                      onClick={() => add(g)}
+                      aria-label={`Add ${g.name}`}
+                    >
+                      <span className="mono">{nuyen(cost)}{g.rated ? '/R' : ''}</span> <span aria-hidden>+</span>
                     </button>
                   </li>
                 )

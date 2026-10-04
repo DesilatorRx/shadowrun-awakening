@@ -30,6 +30,7 @@ It needs no install and no account. Characters are saved in your browser, and yo
   - availability cap of 7 instead of 6
   - extra spells/complex forms bought with karma at creation (allowed in the original 2019 book)
   - extra contact points bought with karma (Sixth World Companion option)
+- **Item details on hover or tap** (ⓘ): an own-words description, full stats, and the rulebook page for every gear item.
 - **Print or save as PDF** from a clean printable sheet.
 - Works on desktop and phone.
 

@@ -7,6 +7,7 @@ import type { AttrId, Character } from '../../engine/types'
 import { ATTRS } from '../../engine/types'
 import type { Issue } from '../../engine/validate'
 import { nuyen } from '../format'
+import { GearName } from '../GearInfo'
 
 export function SheetStep({ c, issues }: { c: Character; issues: Issue[] }) {
   const d = computeDerived(c)
@@ -173,7 +174,7 @@ export function SheetStep({ c, issues }: { c: Character; issues: Issue[] }) {
                 if (!item) return null
                 return (
                   <tr key={g.uid}>
-                    <td>{item.name}{item.rated && ` (R${g.rating})`}{g.qty > 1 && ` ×${g.qty}`}</td>
+                    <td><GearName item={item} rating={g.rating} />{item.rated && ` (R${g.rating})`}{g.qty > 1 && ` ×${g.qty}`}</td>
                     <td className="small dim">{item.stats}</td>
                   </tr>
                 )
