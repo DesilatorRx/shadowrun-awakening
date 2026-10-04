@@ -145,7 +145,8 @@ export interface ItemEffects {
 export interface Lifestyle { id: string; name: string; cost: number }
 
 export type GearCategory =
-  | 'firearm' | 'melee' | 'armor' | 'electronics' | 'cyberware' | 'bioware' | 'misc' | 'vehicle'
+  | 'firearm' | 'melee' | 'ammo' | 'accessory' | 'explosive' | 'armor' | 'electronics' | 'software'
+  | 'cyberware' | 'bioware' | 'magical' | 'vehicle' | 'drone' | 'drug' | 'misc'
 
 export interface GearItem {
   id: string
@@ -170,8 +171,10 @@ export interface GearItem {
   /** Item ids this can't be installed alongside (checked both ways). */
   conflicts?: string[]
   rated?: { min: number; max: number }
-  /** When rated, cost/essence/avail scale with rating. */
+  /** When rated, cost/essence/avail scale linearly with rating. */
   perRating?: { cost?: number; essence?: number; avail?: number }
+  /** When rated with non-linear values: arrays indexed from rated.min upward. */
+  byRating?: { cost?: number[]; essence?: number[]; avail?: number[] }
 }
 
 // ---------------------------------------------------------------------------

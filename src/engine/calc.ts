@@ -156,17 +156,31 @@ export function gearItem(id: string): GearItem | undefined {
   return GEAR.find(g => g.id === id)
 }
 
+/** Value from a byRating table, if the item has one for this field. */
+function ratingTable(item: GearItem, key: 'cost' | 'essence' | 'avail', rating?: number): number | undefined {
+  const table = item.byRating?.[key]
+  if (!item.rated || !table?.length) return undefined
+  const i = Math.min(table.length - 1, Math.max(0, (rating ?? item.rated.min) - item.rated.min))
+  return table[i]
+}
+
 export function gearUnitCost(item: GearItem, rating?: number): number {
+  const t = ratingTable(item, 'cost', rating)
+  if (t !== undefined) return t
   if (item.rated && item.perRating?.cost) return item.perRating.cost * (rating ?? item.rated.min)
   return item.cost
 }
 
 export function gearEssence(item: GearItem, rating?: number): number {
+  const t = ratingTable(item, 'essence', rating)
+  if (t !== undefined) return t
   if (item.rated && item.perRating?.essence !== undefined) return item.perRating.essence * (rating ?? item.rated.min)
   return item.essence ?? 0
 }
 
 export function gearAvail(item: GearItem, rating?: number): number {
+  const t = ratingTable(item, 'avail', rating)
+  if (t !== undefined) return t
   if (item.rated && item.perRating?.avail) return item.perRating.avail * (rating ?? item.rated.min)
   return item.avail
 }
@@ -352,11 +366,13 @@ export function computeBudget(c: Character): Budget {
     .filter(g => cats.includes(gearItem(g.id)?.category ?? ''))
     .reduce((s, g) => s + ownedGearCost(g), 0)
   const nuyenBreakdown = [
-    { label: 'Weapons', nuyen: byCat(['firearm', 'melee']) },
+    { label: 'Weapons', nuyen: byCat(['firearm', 'melee', 'ammo', 'accessory', 'explosive']) },
     { label: 'Armor', nuyen: byCat(['armor']) },
-    { label: 'Electronics', nuyen: byCat(['electronics']) },
+    { label: 'Electronics', nuyen: byCat(['electronics', 'software']) },
     { label: 'Augmentations', nuyen: byCat(['cyberware', 'bioware']) },
-    { label: 'Other gear', nuyen: byCat(['misc', 'vehicle']) },
+    { label: 'Magical gear', nuyen: byCat(['magical']) },
+    { label: 'Vehicles & drones', nuyen: byCat(['vehicle', 'drone']) },
+    { label: 'Other gear', nuyen: byCat(['misc', 'drug']) },
     { label: 'Lifestyle', nuyen: lifestyle ? lifestyle.cost * Math.max(1, c.lifestyleMonths) : 0 },
   ]
 

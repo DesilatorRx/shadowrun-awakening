@@ -10,30 +10,37 @@ import { GearName } from '../GearInfo'
 import { PoolBadge, Section, Stepper, type StepProps } from '../ui'
 import { nuyen } from '../format'
 
-const TABS: { id: GearCategory | 'aug'; label: string }[] = [
-  { id: 'firearm', label: 'Firearms' },
-  { id: 'melee', label: 'Melee' },
-  { id: 'armor', label: 'Armor' },
-  { id: 'electronics', label: 'Electronics' },
-  { id: 'aug', label: 'Augmentations' },
-  { id: 'misc', label: 'Other' },
+type Tab = 'firearm' | 'melee' | 'ammo' | 'explosive' | 'armor' | 'electronics' | 'aug' | 'magical' | 'vehicle' | 'other'
+
+const TABS: { id: Tab; label: string; cats: GearCategory[] }[] = [
+  { id: 'firearm', label: 'Firearms', cats: ['firearm'] },
+  { id: 'melee', label: 'Melee', cats: ['melee'] },
+  { id: 'ammo', label: 'Ammo & Accessories', cats: ['ammo', 'accessory'] },
+  { id: 'explosive', label: 'Explosives', cats: ['explosive'] },
+  { id: 'armor', label: 'Armor', cats: ['armor'] },
+  { id: 'electronics', label: 'Electronics', cats: ['electronics', 'software'] },
+  { id: 'aug', label: 'Augmentations', cats: ['cyberware', 'bioware'] },
+  { id: 'magical', label: 'Magic', cats: ['magical'] },
+  { id: 'vehicle', label: 'Vehicles & Drones', cats: ['vehicle', 'drone'] },
+  { id: 'other', label: 'Other', cats: ['misc', 'drug'] },
 ]
 
-const inTab = (g: GearItem, tab: GearCategory | 'aug') =>
-  tab === 'aug' ? g.category === 'cyberware' || g.category === 'bioware' : g.category === tab
+const inTab = (g: GearItem, tab: Tab) => TABS.find(t => t.id === tab)!.cats.includes(g.category)
 
 const availLabel = (g: GearItem, rating?: number) => `${gearAvail(g, rating)}${g.legality ?? ''}`
 
 export function GearStep({ c, set }: StepProps) {
   const b = computeBudget(c)
-  const [tab, setTab] = useState<GearCategory | 'aug'>('firearm')
+  const [tab, setTab] = useState<Tab>('firearm')
   const [query, setQuery] = useState('')
   const left = remaining(b.nuyen)
   const karmaLeft = remaining(b.karma)
 
   const catalog = useMemo(() => {
     const q = query.trim().toLowerCase()
-    return GEAR.filter(g => inTab(g, tab) && (!q || g.name.toLowerCase().includes(q) || g.subcategory?.toLowerCase().includes(q)))
+    // A search looks through every tab; otherwise show the selected tab.
+    if (q) return GEAR.filter(g => g.name.toLowerCase().includes(q) || g.subcategory?.toLowerCase().includes(q))
+    return GEAR.filter(g => inTab(g, tab))
   }, [tab, query])
 
   const groups = useMemo(() => {
@@ -42,7 +49,8 @@ export function GearStep({ c, set }: StepProps) {
       const k = g.subcategory ?? 'Other'
       m.set(k, [...(m.get(k) ?? []), g])
     }
-    return [...m.entries()]
+    // City-edition gear goes last in each tab.
+    return [...m.entries()].sort(([a], [b]) => Number(a === 'Berlin') - Number(b === 'Berlin'))
   }, [catalog])
 
   const add = (g: GearItem) => set(ch => {
@@ -126,7 +134,7 @@ export function GearStep({ c, set }: StepProps) {
               <button key={t.id} type="button" className={tab === t.id ? 'selected' : ''} aria-pressed={tab === t.id} onClick={() => setTab(t.id)}>{t.label}</button>
             ))}
           </div>
-          <input type="search" placeholder="Search…" value={query} onChange={e => setQuery(e.target.value)} aria-label="Search gear" />
+          <input type="search" placeholder="Search all gear…" value={query} onChange={e => setQuery(e.target.value)} aria-label="Search gear" />
         </div>
         {groups.map(([sub, items]) => (
           <div key={sub} className="gear-group">

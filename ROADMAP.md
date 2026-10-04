@@ -24,7 +24,7 @@ GM mode is simply "no budget, sanity checks only."
 ### Phase 1: Player creation (now)
 - [x] Priority creation, Berlin 2023 rules, verified against the book
 - [x] Augmentation effects, gear popovers, skill qualities, specializations
-- [ ] Fill out the gear catalog (cybereyes/ears, smartlink, cyberjacks, cyberlimbs, grenades, drugs, programs, vehicles/drones)
+- [x] Full gear catalog from the Berlin City Edition (~590 items: weapons, ammo, explosives, armor, electronics, software, augmentations, magic, drugs, vehicles, drones, Berlin gear)
 - [ ] Popover descriptions for qualities, spells, adept powers, complex forms
 - [ ] Improved Physical Attribute (adept power with an attribute choice)
 

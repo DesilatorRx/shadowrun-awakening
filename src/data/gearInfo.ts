@@ -1,9 +1,11 @@
 // Short item descriptions written in our own words (not book text), with the book page for full rules.
 // Page numbers refer to Shadowrun, Sixth World Core Rulebook: City Edition - Berlin (2023).
 
+import { GEAR_INFO_EXTRA } from './gearExtra'
+
 export interface GearInfo { page: number; summary: string }
 
-export const GEAR_INFO: Record<string, GearInfo> = {
+const GEAR_INFO_BASE: Record<string, GearInfo> = {
   defiance_super_shock: { page: 250, summary: "Heavy wired taser holding four darts on short tethers, trading range for a stronger jolt. Deals electrical Stun damage and can also be pressed against a target in close combat." },
   yamaha_pulsar_1: { page: 250, summary: "Wireless-capacitor taser with better reach than tethered models but a weaker shock. Deals electrical Stun damage; this base version has no contacts for hand-to-hand use." },
   yamaha_pulsar_2: { page: 250, summary: "Upgraded Pulsar wireless taser that adds shock contacts on the grip, so it can also be used as a club in close combat. Deals electrical Stun damage." },
@@ -201,3 +203,5 @@ export const GEAR_INFO: Record<string, GearInfo> = {
   plastic_restraints: { page: 278, summary: "Disposable plastic straps for binding a captive, sold in bundles. Light and easy to carry, but the weakest restraint option." },
   metal_restraints: { page: 278, summary: "Classic metal cuffs with either a mechanical or wireless-controlled lock. Sturdier than plastic straps." },
 }
+
+export const GEAR_INFO: Record<string, GearInfo> = { ...GEAR_INFO_BASE, ...GEAR_INFO_EXTRA }

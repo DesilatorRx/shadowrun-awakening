@@ -1,7 +1,8 @@
-// Gear catalog (core rulebook subset). Game statistics only.
+// Gear catalog: hand-maintained core entries; the rest of the book lives in gearExtra.ts. Game statistics only.
 // Verified against Shadowrun Sixth World Core Rulebook: City Edition - Berlin (2023), gear chapter pp. 244-294.
 
 import type { GearItem } from '../engine/types'
+import { GEAR_EXTRA } from './gearExtra'
 
 export const WEAPONS: GearItem[] = [
   { id: 'defiance_super_shock', name: 'Defiance Super Shock', category: 'firearm', subcategory: 'Tasers', cost: 340, avail: 1, stats: 'DV 6S(e) · AR 10/6/–/–/– · SS · 4(m)' },
@@ -93,7 +94,7 @@ export const ARMOR: GearItem[] = [
   { id: 'full_body_armor', name: 'Full Body Armor', category: 'armor', subcategory: 'Body', cost: 2000, avail: 4, legality: 'L', defense: 5, stats: 'Defense +5 · Social −5' },
   { id: 'chameleon_suit', name: 'Chameleon Suit', category: 'armor', subcategory: 'Body', cost: 2000, avail: 4, legality: 'I', defense: 2, stats: 'Defense +2 · camouflage' },
   { id: 'helmet', name: 'Helmet', category: 'armor', subcategory: 'Helmet', cost: 200, avail: 1, defense: 1, stacks: true, stats: 'Defense +1 (adds)' },
-  { id: 'full_body_armor_helmet', name: 'Full Body Armor Helmet', category: 'armor', subcategory: 'Helmet', cost: 500, avail: 4, legality: 'L', defense: 2, stacks: true, stats: 'Defense +2 (adds); sold with full body armor' },
+  { id: 'full_body_armor_helmet', name: 'Full Body Armor Helmet', category: 'armor', subcategory: 'Helmet', cost: 500, avail: 0, defense: 2, stacks: true, stats: 'Defense +2 (adds); sold with full body armor' },
   { id: 'ballistic_shield', name: 'Ballistic Shield', category: 'armor', subcategory: 'Shield', cost: 900, avail: 4, defense: 2, stacks: true, stats: 'Defense +2 (adds)' },
   { id: 'riot_shield', name: 'Riot Shield', category: 'armor', subcategory: 'Shield', cost: 1200, avail: 4, defense: 2, stacks: true, stats: 'Defense +2 (adds)' },
 ]
@@ -105,18 +106,18 @@ const perRating = (max: number, cost: number, avail?: number) =>
   ({ rated: { min: 1, max }, perRating: avail ? { cost, avail } : { cost } })
 
 export const ELECTRONICS: GearItem[] = [
-  el('meta_link', 'Meta Link', 'Commlinks', 100, 2, dr(1)),
-  el('sony_emperor', 'Sony Emperor', 'Commlinks', 700, 2, dr(2)),
-  el('renraku_sensei', 'Renraku Sensei', 'Commlinks', 1000, 2, dr(3)),
-  el('erika_elite', 'Erika Elite', 'Commlinks', 2500, 2, dr(4)),
-  el('hermes_ikon', 'Hermes Ikon', 'Commlinks', 5000, 3, dr(5)),
-  el('transys_avalon', 'Transys Avalon', 'Commlinks', 8000, 3, dr(6)),
-  el('erika_mcd6', 'Erika MCD-6', 'Cyberdecks', 24750, 3, { legality: 'I', ...dr(1) }),
-  el('spinrad_falcon', 'Spinrad Falcon', 'Cyberdecks', 61500, 3, { legality: 'I', ...dr(2) }),
-  el('mct_360', 'MCT 360', 'Cyberdecks', 95000, 3, { legality: 'I', ...dr(3) }),
-  el('renraku_kitsune', 'Renraku Kitsune', 'Cyberdecks', 107000, 4, { legality: 'I', ...dr(4) }),
-  el('shiawase_cyber6', 'Shiawase Cyber-6', 'Cyberdecks', 172500, 5, { legality: 'I', ...dr(5) }),
-  el('fairlight_excalibur', 'Fairlight Excalibur', 'Cyberdecks', 410600, 6, { legality: 'I', ...dr(6) }),
+  el('meta_link', 'Meta Link', 'Commlinks', 100, 2, { stats: 'DR 1 · D/F 1/0 · 0 program slots' }),
+  el('sony_emperor', 'Sony Emperor', 'Commlinks', 700, 2, { stats: 'DR 2 · D/F 1/1 · 1 program slot' }),
+  el('renraku_sensei', 'Renraku Sensei', 'Commlinks', 1000, 2, { stats: 'DR 3 · D/F 2/0 · 1 program slot' }),
+  el('erika_elite', 'Erika Elite', 'Commlinks', 2500, 2, { stats: 'DR 4 · D/F 2/1 · 2 program slots' }),
+  el('hermes_ikon', 'Hermes Ikon', 'Commlinks', 5000, 3, { stats: 'DR 5 · D/F 3/0 · 2 program slots' }),
+  el('transys_avalon', 'Transys Avalon', 'Commlinks', 8000, 3, { stats: 'DR 6 · D/F 3/1 · 3 program slots' }),
+  el('erika_mcd6', 'Erika MCD-6', 'Cyberdecks', 24750, 3, { legality: 'I', stats: 'DR 1 · A/S 4/3 · 2 program slots' }),
+  el('spinrad_falcon', 'Spinrad Falcon', 'Cyberdecks', 61500, 3, { legality: 'I', stats: 'DR 2 · A/S 5/4 · 4 program slots' }),
+  el('mct_360', 'MCT 360', 'Cyberdecks', 95000, 3, { legality: 'I', stats: 'DR 3 · A/S 6/5 · 6 program slots' }),
+  el('renraku_kitsune', 'Renraku Kitsune', 'Cyberdecks', 107000, 4, { legality: 'I', stats: 'DR 4 · A/S 7/6 · 8 program slots' }),
+  el('shiawase_cyber6', 'Shiawase Cyber-6', 'Cyberdecks', 172500, 5, { legality: 'I', stats: 'DR 5 · A/S 8/7 · 10 program slots' }),
+  el('fairlight_excalibur', 'Fairlight Excalibur', 'Cyberdecks', 410600, 6, { legality: 'I', stats: 'DR 6 · A/S 9/8 · 12 program slots' }),
   el('scratch_built_junk', 'Scratch-Built Junk', 'Rigger Consoles', 1400, 1, { legality: 'L', ...dr(1) }),
   el('allegiance_control_center', 'Allegiance Control Center', 'Rigger Consoles', 8000, 3, { legality: 'L', ...dr(2) }),
   el('essy_drone_master', 'Essy Motors DroneMaster', 'Rigger Consoles', 16000, 3, { legality: 'L', ...dr(3) }),
@@ -130,11 +131,11 @@ export const ELECTRONICS: GearItem[] = [
   el('trodes', 'Trodes', 'Accessories', 70, 1),
   el('subvocal_mic', 'Subvocal Microphone', 'Accessories', 50, 2),
   el('satellite_link', 'Satellite Link', 'Accessories', 500, 3),
-  el('bug_scanner', 'Bug Scanner', 'Communication', 200, 3),
-  el('micro_transceiver', 'Micro-Transceiver', 'Communication', 100, 1),
-  el('tag_eraser', 'Tag Eraser', 'Communication', 450, 3),
-  el('white_noise_generator', 'White Noise Generator', 'Communication', 50, 3, perRating(6, 50)),
-  el('jammer', 'Jammer', 'Communication', 200, 4, { legality: 'L', ...perRating(6, 200) }),
+  el('bug_scanner', 'Bug Scanner', 'Communications', 200, 3),
+  el('micro_transceiver', 'Micro-Transceiver', 'Communications', 100, 1),
+  el('tag_eraser', 'Tag Eraser', 'Communications', 450, 3),
+  el('white_noise_generator', 'White Noise Generator', 'Communications', 50, 3, perRating(6, 50)),
+  el('jammer', 'Jammer, Area', 'Communications', 200, 4, { legality: 'L', ...perRating(6, 200) }),
   el('credstick_standard', 'Credstick (Standard)', 'ID & Credit', 5, 1),
   el('fake_sin', 'Fake SIN', 'ID & Credit', 2500, 4, { legality: 'I', ...perRating(6, 2500) }),
   el('fake_license', 'Fake License', 'ID & Credit', 200, 4, { legality: 'I', ...perRating(6, 200) }),
@@ -182,7 +183,7 @@ export const AUGMENTATIONS: GearItem[] = [
   cyber('cyber_holdout', 'Implanted Hold-Out Pistol', 'Implant Weapons', 2000, 3, 0.1, { legality: 'L' }),
   cyber('cyber_heavy_pistol', 'Implanted Heavy Pistol', 'Implant Weapons', 4300, 4, 0.5, { legality: 'L' }),
   bio('cats_eyes', "Cat's Eyes", 4000, 3, 0.1),
-  bio('enhanced_articulation', 'Enhanced Articulation', 30000, 4, 0.2),
+  bio('enhanced_articulation', 'Enhanced Articulation', 30000, 4, 0.2, { effects: { attrs: { agi: 1 } } }),
   bio('platelet_factories', 'Platelet Factories', 17000, 4, 0.2),
   bio('skin_pocket', 'Skin Pocket', 12000, 4, 0.1, { maxCount: 9 }),
   bio('bone_density', 'Bone Density Augmentation', 5000, 4, 0.3, { legality: 'L', ...rated(4, 5000, 0.3), conflicts: ['bone_lacing_aluminium', 'bone_lacing_plastic', 'bone_lacing_titanium'] }),
@@ -204,6 +205,8 @@ export const AUGMENTATIONS: GearItem[] = [
 
 const misc = (id: string, name: string, sub: string, cost: number, avail: number, extra: Partial<GearItem> = {}): GearItem =>
   ({ id, name, category: 'misc', subcategory: sub, cost, avail, ...extra })
+const ammo = (id: string, name: string, sub: string, cost: number, avail: number, extra: Partial<GearItem> = {}): GearItem =>
+  ({ id, name, category: 'ammo', subcategory: sub, cost, avail, ...extra })
 
 export const MISC: GearItem[] = [
   misc('medkit', 'Medkit', 'Medical', 250, 3, perRating(6, 250)),
@@ -214,12 +217,12 @@ export const MISC: GearItem[] = [
   misc('biomonitor', 'Biomonitor', 'Medical', 300, 2),
   misc('docwagon_basic_year', 'DocWagon Basic (1 year)', 'Medical', 5000, 1),
   misc('docwagon_gold_year', 'DocWagon Gold (1 year)', 'Medical', 25000, 1),
-  misc('ammo_light', 'Ammo: Holdout/Light Pistol/MP (10)', 'Ammunition', 5, 1),
-  misc('ammo_heavy_smg', 'Ammo: Heavy Pistol/SMG (10)', 'Ammunition', 10, 1),
-  misc('ammo_rifle', 'Ammo: Rifle (10)', 'Ammunition', 20, 2, { legality: 'L' }),
-  misc('ammo_mg', 'Ammo: Machine Gun (10)', 'Ammunition', 15, 2, { legality: 'L' }),
-  misc('ammo_taser', 'Ammo: Taser Darts (10)', 'Ammunition', 10, 1),
-  misc('ammo_bolt', 'Crossbow Bolt', 'Ammunition', 5, 2),
+  ammo('ammo_light', 'Ammo: Holdout/Light Pistol/MP (10)', 'Ammunition', 5, 1),
+  ammo('ammo_heavy_smg', 'Ammo: Heavy Pistol/SMG (10)', 'Ammunition', 10, 1),
+  ammo('ammo_rifle', 'Ammo: Rifle (10)', 'Ammunition', 20, 2, { legality: 'L' }),
+  ammo('ammo_mg', 'Ammo: Machine Gun (10)', 'Ammunition', 15, 2, { legality: 'L' }),
+  ammo('ammo_taser', 'Ammo: Taser Darts (10)', 'Ammunition', 10, 1),
+  ammo('ammo_bolt', 'Crossbow Bolt', 'Ammunition', 5, 2),
   misc('lockpick_set', 'Lockpick Set', 'Breaking & Entering', 250, 2),
   misc('autopicker', 'Autopicker', 'Breaking & Entering', 500, 4, { legality: 'L' }),
   misc('keycard_copier', 'Keycard Copier', 'Breaking & Entering', 600, 4, { legality: 'I' }),
@@ -229,4 +232,4 @@ export const MISC: GearItem[] = [
   misc('metal_restraints', 'Metal Restraints', 'Security', 20, 1),
 ]
 
-export const GEAR: GearItem[] = [...WEAPONS, ...ARMOR, ...ELECTRONICS, ...AUGMENTATIONS, ...MISC]
+export const GEAR: GearItem[] = [...WEAPONS, ...ARMOR, ...ELECTRONICS, ...AUGMENTATIONS, ...MISC, ...GEAR_EXTRA]
