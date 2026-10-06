@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { QUALITIES, SKILLS } from '../../data'
 import {
-  ATTR_NAMES, augmentedValue, computeBonuses, computeBudget, qualitySkill, remaining, skillCap, skillRating,
+  ATTR_NAMES, augmentedValue, computeBonuses, effectiveMagic, effectiveResonance, computeBudget, qualitySkill, remaining, skillCap, skillRating,
 } from '../../engine/calc'
 import { RULES } from '../../engine/rules'
 import type { AttrId, Character, Language, SkillAlloc } from '../../engine/types'
@@ -35,7 +35,10 @@ export function SkillsStep({ c, set }: StepProps) {
   })
 
   const dicePool = (attr: string, rating: number) => {
-    if (attr === 'mag' || attr === 'res' || attr === 'edg') return null
+    // Magic and Resonance skills roll rank + Magic/Resonance (after any Essence loss).
+    if (attr === 'mag') return rating + effectiveMagic(c)
+    if (attr === 'res') return rating + effectiveResonance(c)
+    if (attr === 'edg') return null
     return rating + augmentedValue(c, attr as AttrId, bonuses)
   }
 
