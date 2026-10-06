@@ -1,4 +1,4 @@
-# Shadowrun Awakening: free Shadowrun 6e character creator
+# Shadowrun Awakening: free Shadowrun character creator (6th Edition)
 
 A free, open-source **Shadowrun Sixth World (SR6 / 6th Edition) character creator** that runs in your browser. **Use it here: https://desilatorrx.github.io/shadowrun-awakening/**
 

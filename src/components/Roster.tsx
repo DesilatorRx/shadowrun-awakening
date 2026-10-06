@@ -31,7 +31,7 @@ export function Roster({ chars, onOpen, onCreate, onImport, onDelete, onDuplicat
         <div className="hero-mark" aria-hidden>▲</div>
         <div>
           <h1>Shadowrun Awakening</h1>
-          <p className="dim">A free, open-source Shadowrun Sixth World character generator, using the Berlin City Edition core rules (2023).</p>
+          <p className="dim">A free Shadowrun character creator for 6th Edition (Sixth World), using the Berlin City Edition core rules (2023).</p>
         </div>
       </header>
 
