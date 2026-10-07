@@ -9,6 +9,8 @@ import { ATTRS } from '../../engine/types'
 import type { Issue } from '../../engine/validate'
 import { nuyen } from '../format'
 import { GearName } from '../GearInfo'
+import { CombatPanel } from '../CombatPanel'
+import { spellAttackRating } from '../../engine/combat'
 
 export function SheetStep({ c, issues }: { c: Character; issues: Issue[] }) {
   const d = computeDerived(c)
@@ -175,16 +177,19 @@ export function SheetStep({ c, issues }: { c: Character; issues: Issue[] }) {
           </div>
         </section>
 
+        <CombatPanel c={c} />
+
         {(c.spells.length > 0 || c.adeptPowers.length > 0 || c.complexForms.length > 0) && (
           <section>
             {c.spells.length > 0 && (
               <>
                 <h3>
                   Spells
+                  {spellAttackRating(c) !== null && <span className="small dim"> · Attack Rating Magic + {ATTR_NAMES[tradition!.drain[1]]} = <strong className="mono">{spellAttackRating(c)}</strong></span>}
                   {tradition && <span className="small dim"> · drain resistance {ATTR_NAMES[tradition.drain[0]]} + {ATTR_NAMES[tradition.drain[1]]} = <strong className="mono">{augmentedValue(c, tradition.drain[0] as AttrId, bonuses) + augmentedValue(c, tradition.drain[1] as AttrId, bonuses)}</strong></span>}
                 </h3>
                 <table className="compact">
-                  <thead><tr><th>Spell</th><th>Category</th><th className="num">Type</th><th>Range</th><th>Duration</th><th className="num">Drain</th></tr></thead>
+                  <thead><tr><th>Spell</th><th>Category</th><th className="num">Type</th><th>Range</th><th>Duration</th><th className="num">AR</th><th className="num">Drain</th></tr></thead>
                   <tbody>
                     {c.spells.map(id => spellById(id)).filter(sp => !!sp).map(sp => (
                       <tr key={sp!.id}>
@@ -193,6 +198,7 @@ export function SheetStep({ c, issues }: { c: Character; issues: Issue[] }) {
                         <td className="num">{sp!.type === 'M' ? 'Mana' : 'Physical'}</td>
                         <td>{sp!.range}</td>
                         <td>{sp!.duration}</td>
+                        <td className="num">{sp!.category === 'combat' ? spellAttackRating(c) ?? '—' : '—'}</td>
                         <td className="num">{sp!.drain}</td>
                       </tr>
                     ))}
