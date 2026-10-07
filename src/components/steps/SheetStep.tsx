@@ -163,11 +163,6 @@ export function SheetStep({ c, issues }: { c: Character; issues: Issue[] }) {
                 </p>
               </>
             )}
-            {c.spells.length > 0 && <><h3>Spells</h3><p className="small">{c.spells.map(id => spellById(id)?.name).filter(Boolean).join(', ')}</p></>}
-            {c.adeptPowers.length > 0 && (
-              <><h3>Adept powers</h3><p className="small">{c.adeptPowers.map(t => { const p = ADEPT_POWERS.find(x => x.id === t.id); return p ? `${p.name}${p.maxLevel ? ` ${t.level}` : ''}` : '' }).join(', ')}</p></>
-            )}
-            {c.complexForms.length > 0 && <><h3>Complex forms</h3><p className="small">{c.complexForms.map(id => formById(id)?.name).filter(Boolean).join(', ')}</p></>}
           </div>
           <div>
             <h3>Contacts</h3>
@@ -179,6 +174,71 @@ export function SheetStep({ c, issues }: { c: Character; issues: Issue[] }) {
             <p className="small">{lifestyle ? `${lifestyle.name} (${c.lifestyleMonths} month${c.lifestyleMonths > 1 ? 's' : ''} paid)` : '—'}</p>
           </div>
         </section>
+
+        {(c.spells.length > 0 || c.adeptPowers.length > 0 || c.complexForms.length > 0) && (
+          <section>
+            {c.spells.length > 0 && (
+              <>
+                <h3>
+                  Spells
+                  {tradition && <span className="small dim"> · drain resistance {ATTR_NAMES[tradition.drain[0]]} + {ATTR_NAMES[tradition.drain[1]]} = <strong className="mono">{augmentedValue(c, tradition.drain[0] as AttrId, bonuses) + augmentedValue(c, tradition.drain[1] as AttrId, bonuses)}</strong></span>}
+                </h3>
+                <table className="compact">
+                  <thead><tr><th>Spell</th><th>Category</th><th className="num">Type</th><th>Range</th><th>Duration</th><th className="num">Drain</th></tr></thead>
+                  <tbody>
+                    {c.spells.map(id => spellById(id)).filter(sp => !!sp).map(sp => (
+                      <tr key={sp!.id}>
+                        <td>{sp!.name}</td>
+                        <td className="dim" style={{ textTransform: 'capitalize' }}>{sp!.category}</td>
+                        <td className="num">{sp!.type === 'M' ? 'Mana' : 'Physical'}</td>
+                        <td>{sp!.range}</td>
+                        <td>{sp!.duration}</td>
+                        <td className="num">{sp!.drain}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </>
+            )}
+            {c.adeptPowers.length > 0 && (
+              <>
+                <h3>Adept powers</h3>
+                <table className="compact">
+                  <thead><tr><th>Power</th><th className="num">Level</th><th className="num">PP</th></tr></thead>
+                  <tbody>
+                    {c.adeptPowers.map(t => {
+                      const p = ADEPT_POWERS.find(x => x.id === t.id)
+                      if (!p) return null
+                      return (
+                        <tr key={t.id}>
+                          <td>{p.name}</td>
+                          <td className="num">{p.maxLevel ? t.level : '—'}</td>
+                          <td className="num">{p.cost * (p.maxLevel ? Math.max(1, t.level) : 1)}</td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </>
+            )}
+            {c.complexForms.length > 0 && (
+              <>
+                <h3>
+                  Complex forms
+                  <span className="small dim"> · fading resistance Willpower + Logic = <strong className="mono">{augmentedValue(c, 'wil', bonuses) + augmentedValue(c, 'log', bonuses)}</strong></span>
+                </h3>
+                <table className="compact">
+                  <thead><tr><th>Complex form</th><th>Duration</th><th className="num">Fade</th></tr></thead>
+                  <tbody>
+                    {c.complexForms.map(id => formById(id)).filter(f => !!f).map(f => (
+                      <tr key={f!.id}><td>{f!.name}</td><td>{f!.duration}</td><td className="num">{f!.fade}</td></tr>
+                    ))}
+                  </tbody>
+                </table>
+              </>
+            )}
+          </section>
+        )}
 
         <section>
           <h3>Gear</h3>

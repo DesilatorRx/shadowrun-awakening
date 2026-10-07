@@ -180,3 +180,5 @@ ul.plain li + li { margin-top: 0.2rem; }
 
 .spec-input { width: 11rem; }
 .stack-tight { display: inline-flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+
+.sheet h3 .small { text-transform: none; letter-spacing: 0; }
