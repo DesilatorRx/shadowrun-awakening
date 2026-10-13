@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { MAGIC_TYPE_NAMES, metatypeOf } from '../engine/calc'
 import type { Character } from '../engine/types'
 import { validate } from '../engine/validate'
+import { track } from '../analytics'
 
 export function Roster({ chars, onOpen, onCreate, onImport, onDelete, onDuplicate }: {
   chars: Character[]
@@ -20,6 +21,7 @@ export function Roster({ chars, onOpen, onCreate, onImport, onDelete, onDuplicat
       const data = JSON.parse(await file.text())
       if (!data || typeof data !== 'object' || !data.priorities || !data.attributes) throw new Error('Not a character file')
       onImport(data as Character)
+      track('import-json', 'Imported a character')
     } catch (e) {
       setError(`Couldn't import ${file.name}: ${(e as Error).message}`)
     }
@@ -87,7 +89,8 @@ export function Roster({ chars, onOpen, onCreate, onImport, onDelete, onDuplicat
 
       <footer className="small faint footer">
         Unofficial fan tool. Shadowrun is a trademark of Topps Company, Inc.; this project is not affiliated with Catalyst Game Labs or Topps.
-        No rules text is included. You'll need the rulebooks.
+        No rules text is included. You'll need the rulebooks. Anonymous usage counts (no cookies, no personal data) via GoatCounter;
+        characters never leave your browser.
       </footer>
     </div>
   )

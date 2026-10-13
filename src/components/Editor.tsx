@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { track } from '../analytics'
 import {
   ATTR_NAMES, MAGIC_TYPE_NAMES, attrValue, computeBonuses, computeBudget, computeDerived, metatypeOf, remaining, type Pool,
 } from '../engine/calc'
@@ -34,6 +35,13 @@ export function Editor({ c, set, onClose }: { c: Character; set: Setter; onClose
   const [step, setStep] = useState<StepId>('concept')
   const issues = useMemo(() => validate(c), [c])
   const idx = STEPS.findIndex(s => s.id === step)
+  const errorCount = issues.filter(i => i.severity === 'error').length
+
+  // Funnel: how far people get (each step counted once per visit), and finished sheets.
+  useEffect(() => { track(`step/${step}`, `Reached step: ${STEPS.find(s => s.id === step)?.label}`, true) }, [step])
+  useEffect(() => {
+    if (step === 'sheet' && errorCount === 0) track('sheet-street-legal', 'Viewed a street-legal sheet', true)
+  }, [step, errorCount])
 
   const props = { c, set }
   const body = {
@@ -57,7 +65,7 @@ export function Editor({ c, set, onClose }: { c: Character; set: Setter; onClose
         <strong className="topbar-name">{c.alias || c.name || 'New runner'}</strong>
         <span className="pill">{c.setting === 'berlin' ? 'Berlin' : c.setting === 'seattle' ? 'Seattle' : 'Core'}</span>
         <span className="spacer" />
-        <button type="button" onClick={() => downloadJson(`${(c.alias || c.name || 'runner').replace(/[^\w-]+/g, '_')}.sr6.json`, c)}>Export JSON</button>
+        <button type="button" onClick={() => { track('export-json', 'Exported a character'); downloadJson(`${(c.alias || c.name || 'runner').replace(/[^\w-]+/g, '_')}.sr6.json`, c) }}>Export JSON</button>
         <button type="button" onClick={() => { setStep('sheet'); setTimeout(() => window.print(), 50) }}>Print</button>
       </header>
 

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { BERLIN_2023_OPTIONS } from '../engine/rules'
 import type { AttrAlloc, Character } from '../engine/types'
+import { track } from '../analytics'
 import { loadActiveId, loadCharacters, saveActiveId, saveCharacters } from './storage'
 
 export const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4)
@@ -70,6 +71,7 @@ export function useCharacters() {
   }, [])
 
   const create = useCallback((setting: Character['setting']) => {
+    track('new-runner', `New runner (${setting})`)
     const c = newCharacter(setting)
     setChars(list => [...list, c])
     setActiveId(c.id)
